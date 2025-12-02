@@ -3,10 +3,11 @@ package kbo.today.adapter.in.web.auth.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import kbo.today.common.validation.SelfValidating;
 import lombok.Getter;
 
 @Getter
-public class CreateUserRequest {
+public class CreateUserRequest extends SelfValidating<CreateUserRequest> {
     @NotBlank(message = "Email is required")
     @Email(message = "Email should be valid")
     private String email;
@@ -20,5 +21,9 @@ public class CreateUserRequest {
     private String nickname;
 
     private String role;
+
+    public void validate() {
+        validateSelf();
+    }
 }
 

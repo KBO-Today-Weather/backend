@@ -1,5 +1,7 @@
 package kbo.today.common.exception;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +35,21 @@ public class GlobalExceptionHandler {
             String errorMessage = error.getDefaultMessage();
             fieldErrors.put(fieldName, errorMessage);
         });
+        
+        ErrorResponse errorResponse = ErrorResponse.of(ErrorCode.VALIDATION_ERROR, fieldErrors);
+        return ResponseEntity.status(ErrorCode.VALIDATION_ERROR.getHttpStatus()).body(errorResponse);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolationException(ConstraintViolationException e) {
+        log.warn("Constraint violation occurred: {}", e.getMessage());
+        Map<String, String> fieldErrors = new HashMap<>();
+        
+        for (ConstraintViolation<?> violation : e.getConstraintViolations()) {
+            String propertyPath = violation.getPropertyPath().toString();
+            String message = violation.getMessage();
+            fieldErrors.put(propertyPath, message);
+        }
         
         ErrorResponse errorResponse = ErrorResponse.of(ErrorCode.VALIDATION_ERROR, fieldErrors);
         return ResponseEntity.status(ErrorCode.VALIDATION_ERROR.getHttpStatus()).body(errorResponse);
