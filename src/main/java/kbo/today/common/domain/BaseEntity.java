@@ -1,4 +1,4 @@
-package kbo.today.domain.common;
+package kbo.today.common.domain;
 
 import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;

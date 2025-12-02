@@ -1,7 +1,7 @@
 package kbo.today.domain.player;
 
 import jakarta.persistence.*;
-import kbo.today.domain.common.BaseEntity;
+import kbo.today.common.domain.BaseEntity;
 
 @Entity
 @Table(name = "batting_records")
