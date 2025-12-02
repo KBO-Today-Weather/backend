@@ -1,6 +1,7 @@
 package kbo.today.domain.user.usecase.impl;
 
 import kbo.today.adapter.out.security.JwtTokenService;
+import kbo.today.common.exception.InvalidCredentialsException;
 import kbo.today.domain.user.domain.User;
 import kbo.today.domain.user.port.UserRepositoryPort;
 import kbo.today.domain.user.usecase.LoginCommand;
@@ -26,10 +27,10 @@ public class LoginInteractor implements LoginUseCase {
     @Override
     public String login(LoginCommand command) {
         User user = userRepository.findByEmail(command.getEmail())
-            .orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
+            .orElseThrow(() -> new InvalidCredentialsException());
 
         if (!passwordEncoder.matches(command.getPassword(), user.getPassword())) {
-            throw new IllegalArgumentException("Invalid email or password");
+            throw new InvalidCredentialsException();
         }
 
         return jwtTokenService.generateToken(

@@ -1,6 +1,7 @@
 package kbo.today.common.exception;
 
-import org.springframework.http.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -13,25 +14,18 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(DuplicateEmailException.class)
-    public ResponseEntity<Map<String, String>> handleDuplicateEmailException(DuplicateEmailException e) {
-        Map<String, String> error = new HashMap<>();
-        error.put("error", "DUPLICATE_EMAIL");
-        error.put("message", e.getMessage());
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
-    }
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Map<String, String>> handleIllegalArgumentException(IllegalArgumentException e) {
-        Map<String, String> error = new HashMap<>();
-        error.put("error", "INVALID_INPUT");
-        error.put("message", e.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException e) {
+        log.warn("Business exception occurred: {} - {}", e.getErrorCode().getCode(), e.getMessage());
+        ErrorResponse errorResponse = ErrorResponse.of(e.getErrorCode(), e.getMessage());
+        return ResponseEntity.status(e.getErrorCode().getHttpStatus()).body(errorResponse);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException e) {
-        Map<String, Object> errors = new HashMap<>();
+    public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException e) {
+        log.warn("Validation error occurred: {}", e.getMessage());
         Map<String, String> fieldErrors = new HashMap<>();
         
         e.getBindingResult().getAllErrors().forEach((error) -> {
@@ -40,19 +34,22 @@ public class GlobalExceptionHandler {
             fieldErrors.put(fieldName, errorMessage);
         });
         
-        errors.put("error", "VALIDATION_ERROR");
-        errors.put("message", "Validation failed");
-        errors.put("fieldErrors", fieldErrors);
-        
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+        ErrorResponse errorResponse = ErrorResponse.of(ErrorCode.VALIDATION_ERROR, fieldErrors);
+        return ResponseEntity.status(ErrorCode.VALIDATION_ERROR.getHttpStatus()).body(errorResponse);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException e) {
+        log.warn("Illegal argument exception: {}", e.getMessage());
+        ErrorResponse errorResponse = ErrorResponse.of(ErrorCode.INVALID_INPUT, e.getMessage());
+        return ResponseEntity.status(ErrorCode.INVALID_INPUT.getHttpStatus()).body(errorResponse);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, String>> handleGenericException(Exception e) {
-        Map<String, String> error = new HashMap<>();
-        error.put("error", "INTERNAL_SERVER_ERROR");
-        error.put("message", "An unexpected error occurred");
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+    public ResponseEntity<ErrorResponse> handleGenericException(Exception e) {
+        log.error("Unexpected error occurred", e);
+        ErrorResponse errorResponse = ErrorResponse.of(ErrorCode.INTERNAL_SERVER_ERROR);
+        return ResponseEntity.status(ErrorCode.INTERNAL_SERVER_ERROR.getHttpStatus()).body(errorResponse);
     }
 }
 

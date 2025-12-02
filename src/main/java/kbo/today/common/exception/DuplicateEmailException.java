@@ -1,8 +1,12 @@
 package kbo.today.common.exception;
 
-public class DuplicateEmailException extends RuntimeException {
+public class DuplicateEmailException extends BusinessException {
+    public DuplicateEmailException() {
+        super(ErrorCode.DUPLICATE_EMAIL);
+    }
+
     public DuplicateEmailException(String message) {
-        super(message);
+        super(ErrorCode.DUPLICATE_EMAIL, message);
     }
 }
 
