@@ -39,6 +39,6 @@ public class UserJpaEntity extends BaseEntity {
     }
 
     public User toDomain() {
-        return new User(getId(), email, password, nickname, role);
+        return new User(getId(), email, password, nickname);
     }
 }

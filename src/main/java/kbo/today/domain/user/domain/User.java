@@ -12,19 +12,19 @@ public class User {
     private final String nickname;
     private final UserRole role;
 
-    public User(Long id, String email, String password, String nickname, UserRole role) {
+    public User(Long id, String email, String password, String nickname) {
         this.id = id;
         this.email = Objects.requireNonNull(email);
         this.password = Objects.requireNonNull(password);
         this.nickname = Objects.requireNonNull(nickname);
-        this.role = Objects.requireNonNull(role);
+        this.role = UserRole.USER;
     }
 
-    public static User create(String email, String password, String nickname, UserRole role) {
-        return new User(null, email, password, nickname, role);
+    public static User create(String email, String password, String nickname) {
+        return new User(null, email, password, nickname);
     }
 
     public User withId(Long id) {
-        return new User(id, this.email, this.password, this.nickname, this.role);
+        return new User(id, this.email, this.password, this.nickname);
     }
 }

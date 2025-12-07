@@ -28,8 +28,7 @@ public class CreateUserInteractor implements CreateUserUseCase {
         User user = User.create(
             command.getEmail(),
             encodedPassword,
-            command.getNickname(),
-            command.getRole()
+            command.getNickname()
         );
         return userRepository.save(user);
     }

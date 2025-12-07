@@ -22,14 +22,10 @@ public class CreateUserCommand extends SelfValidating<CreateUserCommand> {
     @Size(min = 2, max = 20, message = "Nickname must be between 2 and 20 characters")
     private final String nickname;
 
-    @NotNull(message = "Role is required")
-    private final UserRole role;
-
-    public CreateUserCommand(String email, String password, String nickname, UserRole role) {
+    public CreateUserCommand(String email, String password, String nickname) {
         this.email = email;
         this.password = password;
         this.nickname = nickname;
-        this.role = role;
         this.validateSelf();
     }
 }
