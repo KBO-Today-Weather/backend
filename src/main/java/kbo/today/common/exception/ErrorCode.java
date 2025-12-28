@@ -16,6 +16,10 @@ public enum ErrorCode {
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER_002", "User not found"),
     INVALID_USER_INPUT(HttpStatus.BAD_REQUEST, "USER_003", "Invalid user input"),
 
+    // Stadium Related (STADIUM_XXX)
+    STADIUM_NOT_FOUND(HttpStatus.NOT_FOUND, "STADIUM_001", "Stadium not found"),
+    INVALID_STADIUM_LOCATION(HttpStatus.BAD_REQUEST, "STADIUM_002", "Stadium location not set"),
+
     // Validation (VALID_XXX)
     VALIDATION_ERROR(HttpStatus.BAD_REQUEST, "VALID_001", "Validation failed"),
 

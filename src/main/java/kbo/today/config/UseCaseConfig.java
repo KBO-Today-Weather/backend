@@ -9,6 +9,9 @@ import kbo.today.domain.user.usecase.CreateUserUseCase;
 import kbo.today.domain.user.usecase.LoginUseCase;
 import kbo.today.domain.user.usecase.impl.CreateUserInteractor;
 import kbo.today.domain.user.usecase.impl.LoginInteractor;
+import kbo.today.domain.weather.port.WeatherApiPort;
+import kbo.today.domain.weather.usecase.GetStadiumWeatherUseCase;
+import kbo.today.domain.weather.usecase.impl.GetStadiumWeatherInteractor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -36,5 +39,13 @@ public class UseCaseConfig {
     @Bean
     public GetStadiumUseCase getStadiumUseCase(StadiumRepositoryPort stadiumRepositoryPort) {
         return new GetStadiumInteractor(stadiumRepositoryPort);
+    }
+
+    @Bean
+    public GetStadiumWeatherUseCase getStadiumWeatherUseCase(
+        StadiumRepositoryPort stadiumRepositoryPort,
+        WeatherApiPort weatherApiPort
+    ) {
+        return new GetStadiumWeatherInteractor(stadiumRepositoryPort, weatherApiPort);
     }
 }

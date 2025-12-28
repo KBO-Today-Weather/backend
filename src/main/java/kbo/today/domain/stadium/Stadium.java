@@ -30,6 +30,10 @@ public class Stadium extends BaseEntity {
     
     private Integer capacity;
     
+    private Double latitude;
+    
+    private Double longitude;
+    
     @OneToMany(mappedBy = "stadium", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StadiumFood> foods = new ArrayList<>();
     
@@ -46,6 +50,15 @@ public class Stadium extends BaseEntity {
         this.name = name;
         this.address = address;
         this.capacity = capacity;
+    }
+    
+    public Stadium(Team team, String name, String address, Integer capacity, Double latitude, Double longitude) {
+        this.team = team;
+        this.name = name;
+        this.address = address;
+        this.capacity = capacity;
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
     
     public Team getTeam() {
@@ -74,5 +87,18 @@ public class Stadium extends BaseEntity {
     
     public List<StadiumTransport> getTransports() {
         return transports;
+    }
+    
+    public Double getLatitude() {
+        return latitude;
+    }
+    
+    public Double getLongitude() {
+        return longitude;
+    }
+    
+    public void updateLocation(Double latitude, Double longitude) {
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
 }
