@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.5.7'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'jacoco'
 }
 
 group = 'kbo'
@@ -54,6 +55,58 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+    finalizedBy 'jacocoTestReport' // 테스트 후 자동으로 커버리지 리포트 생성
+}
+
+jacoco {
+    toolVersion = "0.8.11"
+}
+
+jacocoTestReport {
+    dependsOn test // test 태스크 실행 후 리포트 생성
+    reports {
+        xml.required = true
+        csv.required = false
+        html.outputLocation = layout.buildDirectory.dir('reports/jacoco/test/html')
+    }
+    
+    // 제외할 패키지 설정
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                '**/Q*.class', // QueryDSL 생성 클래스
+                '**/*Config*.class', // 설정 클래스
+                '**/*Application*.class', // 메인 애플리케이션 클래스
+                '**/dto/**', // DTO 클래스
+                '**/domain/**/port/**', // Port 인터페이스
+            ])
+        }))
+    }
+}
+
+// 커버리지 검증 태스크 (선택적)
+jacocoTestCoverageVerification {
+    dependsOn jacocoTestReport
+    
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.50 
+            }
+        }
+    }
+    
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                '**/Q*.class',
+                '**/*Config*.class',
+                '**/*Application*.class',
+                '**/dto/**',
+                '**/domain/**/port/**',
+            ])
+        }))
+    }
 }
 
 def querydslDir = "$buildDir/generated/querydsl"
@@ -62,8 +115,12 @@ sourceSets {
     main.java.srcDirs += [ querydslDir ]
 }
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
+    options.getGeneratedSourceOutputDirectory().set(file(querydslDir))
     options.annotationProcessorGeneratedSourcesDirectory = file(querydslDir)
+    options.compilerArgs += [
+        '-parameters'
+    ]
 }
 
 clean {

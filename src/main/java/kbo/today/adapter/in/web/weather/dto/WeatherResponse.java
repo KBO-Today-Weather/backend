@@ -17,8 +17,8 @@ public record WeatherResponse(
             forecast.longitude(),
             forecast.timezone(),
             CurrentWeatherResponse.from(forecast.current()),
-            forecast.hourly().stream().map(HourlyWeatherResponse::from).toList(),
-            forecast.daily().stream().map(DailyWeatherResponse::from).toList()
+            forecast.hourly() != null ? forecast.hourly().stream().map(HourlyWeatherResponse::from).toList() : null,
+            forecast.daily() != null ? forecast.daily().stream().map(DailyWeatherResponse::from).toList() : null
         );
     }
 
