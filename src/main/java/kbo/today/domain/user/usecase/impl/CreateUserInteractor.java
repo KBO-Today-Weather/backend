@@ -2,17 +2,17 @@ package kbo.today.domain.user.usecase.impl;
 
 import kbo.today.common.exception.DuplicateEmailException;
 import kbo.today.domain.user.domain.User;
+import kbo.today.domain.user.port.PasswordEncoderPort;
 import kbo.today.domain.user.port.UserRepositoryPort;
 import kbo.today.domain.user.usecase.CreateUserCommand;
 import kbo.today.domain.user.usecase.CreateUserUseCase;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 public class CreateUserInteractor implements CreateUserUseCase {
 
     private final UserRepositoryPort userRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final PasswordEncoderPort passwordEncoder;
 
-    public CreateUserInteractor(UserRepositoryPort userRepository, PasswordEncoder passwordEncoder) {
+    public CreateUserInteractor(UserRepositoryPort userRepository, PasswordEncoderPort passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }

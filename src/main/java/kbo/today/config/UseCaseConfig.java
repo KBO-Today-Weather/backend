@@ -1,9 +1,10 @@
 package kbo.today.config;
 
-import kbo.today.adapter.out.security.JwtTokenService;
 import kbo.today.domain.stadium.port.StadiumRepositoryPort;
 import kbo.today.domain.stadium.usecase.GetStadiumUseCase;
 import kbo.today.domain.stadium.usecase.impl.GetStadiumInteractor;
+import kbo.today.domain.user.port.JwtTokenPort;
+import kbo.today.domain.user.port.PasswordEncoderPort;
 import kbo.today.domain.user.port.UserRepositoryPort;
 import kbo.today.domain.user.usecase.CreateUserUseCase;
 import kbo.today.domain.user.usecase.LoginUseCase;
@@ -14,7 +15,6 @@ import kbo.today.domain.weather.usecase.GetStadiumWeatherUseCase;
 import kbo.today.domain.weather.usecase.impl.GetStadiumWeatherInteractor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 public class UseCaseConfig {
@@ -22,18 +22,18 @@ public class UseCaseConfig {
     @Bean
     public CreateUserUseCase createUserUseCase(
         UserRepositoryPort userRepositoryPort,
-        PasswordEncoder passwordEncoder
+        PasswordEncoderPort passwordEncoderPort
     ) {
-        return new CreateUserInteractor(userRepositoryPort, passwordEncoder);
+        return new CreateUserInteractor(userRepositoryPort, passwordEncoderPort);
     }
 
     @Bean
     public LoginUseCase loginUseCase(
         UserRepositoryPort userRepositoryPort,
-        PasswordEncoder passwordEncoder,
-        JwtTokenService jwtTokenService
+        PasswordEncoderPort passwordEncoderPort,
+        JwtTokenPort jwtTokenPort
     ) {
-        return new LoginInteractor(userRepositoryPort, passwordEncoder, jwtTokenService);
+        return new LoginInteractor(userRepositoryPort, passwordEncoderPort, jwtTokenPort);
     }
 
     @Bean

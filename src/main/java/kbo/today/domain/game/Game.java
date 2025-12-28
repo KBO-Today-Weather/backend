@@ -1,61 +1,68 @@
 package kbo.today.domain.game;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import kbo.today.common.domain.BaseEntity;
 import kbo.today.domain.player.GameBattingRecord;
 import kbo.today.domain.player.GamePitchingRecord;
 import kbo.today.domain.team.Team;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.time.LocalDateTime;
-
-@Entity
-@Table(name = "games")
 public class Game extends BaseEntity {
     
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "home_team_id")
     private Team homeTeam;
-    
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "away_team_id")
     private Team awayTeam;
-    
-    @Column(nullable = false)
     private LocalDateTime gameDate;
-    
     private Integer homeScore;
     private Integer awayScore;
-    
-    @Enumerated(EnumType.STRING)
     private GameStatus status;
-    
     private String stadium;
-    
-    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<GameBattingRecord> battingRecords;
-    
-    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<GamePitchingRecord> pitchingRecords;
     
-    protected Game() {}
+    protected Game() {
+        super();
+    }
     
-    public Game(Team homeTeam, Team awayTeam, LocalDateTime gameDate, String stadium) {
-        this.homeTeam = homeTeam;
-        this.awayTeam = awayTeam;
-        this.gameDate = gameDate;
+    protected Game(Long id, Team homeTeam, Team awayTeam, LocalDateTime gameDate, String stadium,
+                 Integer homeScore, Integer awayScore, GameStatus status,
+                 List<GameBattingRecord> battingRecords, List<GamePitchingRecord> pitchingRecords,
+                 LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime deletedAt) {
+        super(id, createdAt, updatedAt, deletedAt);
+        this.homeTeam = Objects.requireNonNull(homeTeam);
+        this.awayTeam = Objects.requireNonNull(awayTeam);
+        this.gameDate = Objects.requireNonNull(gameDate);
         this.stadium = stadium;
-        this.status = GameStatus.SCHEDULED;
+        this.homeScore = homeScore;
+        this.awayScore = awayScore;
+        this.status = status != null ? status : GameStatus.SCHEDULED;
+        this.battingRecords = battingRecords != null ? battingRecords : new ArrayList<>();
+        this.pitchingRecords = pitchingRecords != null ? pitchingRecords : new ArrayList<>();
+    }
+    
+    public static Game create(Team homeTeam, Team awayTeam, LocalDateTime gameDate, String stadium) {
+        return new Game(null, homeTeam, awayTeam, gameDate, stadium,
+                       null, null, GameStatus.SCHEDULED,
+                       new ArrayList<>(), new ArrayList<>(),
+                       null, null, null);
+    }
+    
+    public static Game fromPersistence(Long id, Team homeTeam, Team awayTeam, LocalDateTime gameDate, String stadium,
+                                       Integer homeScore, Integer awayScore, GameStatus status,
+                                       List<GameBattingRecord> battingRecords, List<GamePitchingRecord> pitchingRecords,
+                                       LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime deletedAt) {
+        return new Game(id, homeTeam, awayTeam, gameDate, stadium,
+                       homeScore, awayScore, status,
+                       battingRecords, pitchingRecords,
+                       createdAt, updatedAt, deletedAt);
+    }
+    
+    public Game withId(Long id) {
+        return new Game(id, this.homeTeam, this.awayTeam, this.gameDate, this.stadium,
+                       this.homeScore, this.awayScore, this.status,
+                       this.battingRecords, this.pitchingRecords,
+                       this.getCreatedAt(), this.getUpdatedAt(), this.getDeletedAt());
     }
     
     public Team getHomeTeam() {

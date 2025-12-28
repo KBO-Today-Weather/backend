@@ -1,41 +1,49 @@
 package kbo.today.domain.stadium;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import java.time.LocalDateTime;
+import java.util.Objects;
 import kbo.today.common.domain.BaseEntity;
 
-@Entity
-@Table(name = "stadium_seats")
 public class StadiumSeat extends BaseEntity {
     
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "stadium_id")
     private Stadium stadium;
-    
-    @Column(nullable = false)
     private String sectionName;
-    
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private SeatType seatType;
-    
     private String description;
     private String recommendation;
     
-    protected StadiumSeat() {}
+    protected StadiumSeat() {
+        super();
+    }
     
-    public StadiumSeat(Stadium stadium, String sectionName, SeatType seatType, String description, String recommendation) {
+    protected StadiumSeat(Long id, Stadium stadium, String sectionName, SeatType seatType,
+                       String description, String recommendation,
+                       LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime deletedAt) {
+        super(id, createdAt, updatedAt, deletedAt);
         this.stadium = stadium;
-        this.sectionName = sectionName;
-        this.seatType = seatType;
+        this.sectionName = Objects.requireNonNull(sectionName);
+        this.seatType = Objects.requireNonNull(seatType);
         this.description = description;
         this.recommendation = recommendation;
+    }
+    
+    public static StadiumSeat create(Stadium stadium, String sectionName, SeatType seatType,
+                                    String description, String recommendation) {
+        return new StadiumSeat(null, stadium, sectionName, seatType, description, recommendation,
+                              null, null, null);
+    }
+    
+    public static StadiumSeat fromPersistence(Long id, Stadium stadium, String sectionName, SeatType seatType,
+                                             String description, String recommendation,
+                                             LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime deletedAt) {
+        return new StadiumSeat(id, stadium, sectionName, seatType, description, recommendation,
+                              createdAt, updatedAt, deletedAt);
+    }
+    
+    public StadiumSeat withId(Long id) {
+        return new StadiumSeat(id, this.stadium, this.sectionName, this.seatType,
+                               this.description, this.recommendation,
+                               this.getCreatedAt(), this.getUpdatedAt(), this.getDeletedAt());
     }
     
     public Stadium getStadium() {

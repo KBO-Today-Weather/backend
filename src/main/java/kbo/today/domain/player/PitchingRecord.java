@@ -1,24 +1,13 @@
 package kbo.today.domain.player;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import java.time.LocalDateTime;
+import java.util.Objects;
 import kbo.today.common.domain.BaseEntity;
 
-@Entity
-@Table(name = "pitching_records")
 public class PitchingRecord extends BaseEntity {
     
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "player_id")
     private Player player;
-    
-    @Column(nullable = false)
     private Integer season;
-    
     private Integer games = 0;
     private Integer gamesStarted = 0;
     private Integer wins = 0;
@@ -35,11 +24,39 @@ public class PitchingRecord extends BaseEntity {
     private Integer atBats = 0;
     private Integer sacrificeFlies = 0;
     
-    protected PitchingRecord() {}
+    protected PitchingRecord() {
+        super();
+    }
     
-    public PitchingRecord(Player player, Integer season) {
-        this.player = player;
-        this.season = season;
+    protected PitchingRecord(Long id, Player player, Integer season, Integer games, Integer gamesStarted,
+                          Integer wins, Integer losses, Integer saves, Integer holds, Double inningsPitched,
+                          Integer hits, Integer runs, Integer earnedRuns, Integer walks, Integer strikeouts,
+                          Integer homeRuns, Integer atBats, Integer sacrificeFlies,
+                          LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime deletedAt) {
+        super(id, createdAt, updatedAt, deletedAt);
+        this.player = Objects.requireNonNull(player);
+        this.season = Objects.requireNonNull(season);
+        this.games = games != null ? games : 0;
+        this.gamesStarted = gamesStarted != null ? gamesStarted : 0;
+        this.wins = wins != null ? wins : 0;
+        this.losses = losses != null ? losses : 0;
+        this.saves = saves != null ? saves : 0;
+        this.holds = holds != null ? holds : 0;
+        this.inningsPitched = inningsPitched != null ? inningsPitched : 0.0;
+        this.hits = hits != null ? hits : 0;
+        this.runs = runs != null ? runs : 0;
+        this.earnedRuns = earnedRuns != null ? earnedRuns : 0;
+        this.walks = walks != null ? walks : 0;
+        this.strikeouts = strikeouts != null ? strikeouts : 0;
+        this.homeRuns = homeRuns != null ? homeRuns : 0;
+        this.atBats = atBats != null ? atBats : 0;
+        this.sacrificeFlies = sacrificeFlies != null ? sacrificeFlies : 0;
+    }
+    
+    public static PitchingRecord create(Player player, Integer season) {
+        return new PitchingRecord(null, player, season, 0, 0, 0, 0, 0, 0, 0.0,
+                                 0, 0, 0, 0, 0, 0, 0, 0,
+                                 null, null, null);
     }
     
     public Player getPlayer() {

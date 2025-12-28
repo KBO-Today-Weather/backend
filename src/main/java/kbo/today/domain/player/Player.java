@@ -1,63 +1,76 @@
 package kbo.today.domain.player;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import kbo.today.common.domain.BaseEntity;
 import kbo.today.domain.team.Team;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-
-@Entity
-@Table(name = "players")
 public class Player extends BaseEntity {
     
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "team_id")
     private Team team;
-    
-    @Column(nullable = false)
     private String name;
-    
-    @Column(nullable = false)
     private Integer backNumber;
-    
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private Position position;
-    
     private LocalDate birthDate;
     private Integer height;
     private Integer weight;
-    
-    @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BattingRecord> battingRecords;
-    
-    @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PitchingRecord> pitchingRecords;
-    
-    @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<GameBattingRecord> gameBattingRecords;
-    
-    @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<GamePitchingRecord> gamePitchingRecords;
     
-    protected Player() {}
+    protected Player() {
+        super();
+    }
     
-    public Player(Team team, String name, Integer backNumber, Position position) {
+    protected Player(Long id, Team team, String name, Integer backNumber, Position position,
+                  LocalDate birthDate, Integer height, Integer weight,
+                  List<BattingRecord> battingRecords, List<PitchingRecord> pitchingRecords,
+                  List<GameBattingRecord> gameBattingRecords, List<GamePitchingRecord> gamePitchingRecords,
+                  LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime deletedAt) {
+        super(id, createdAt, updatedAt, deletedAt);
         this.team = team;
-        this.name = name;
-        this.backNumber = backNumber;
-        this.position = position;
+        this.name = Objects.requireNonNull(name);
+        this.backNumber = Objects.requireNonNull(backNumber);
+        this.position = Objects.requireNonNull(position);
+        this.birthDate = birthDate;
+        this.height = height;
+        this.weight = weight;
+        this.battingRecords = battingRecords != null ? battingRecords : new ArrayList<>();
+        this.pitchingRecords = pitchingRecords != null ? pitchingRecords : new ArrayList<>();
+        this.gameBattingRecords = gameBattingRecords != null ? gameBattingRecords : new ArrayList<>();
+        this.gamePitchingRecords = gamePitchingRecords != null ? gamePitchingRecords : new ArrayList<>();
+    }
+    
+    public static Player create(Team team, String name, Integer backNumber, Position position) {
+        return new Player(null, team, name, backNumber, position,
+                         null, null, null,
+                         new ArrayList<>(), new ArrayList<>(),
+                         new ArrayList<>(), new ArrayList<>(),
+                         null, null, null);
+    }
+    
+    public static Player fromPersistence(Long id, Team team, String name, Integer backNumber, Position position,
+                                        LocalDate birthDate, Integer height, Integer weight,
+                                        List<BattingRecord> battingRecords, List<PitchingRecord> pitchingRecords,
+                                        List<GameBattingRecord> gameBattingRecords, List<GamePitchingRecord> gamePitchingRecords,
+                                        LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime deletedAt) {
+        return new Player(id, team, name, backNumber, position,
+                         birthDate, height, weight,
+                         battingRecords, pitchingRecords,
+                         gameBattingRecords, gamePitchingRecords,
+                         createdAt, updatedAt, deletedAt);
+    }
+    
+    public Player withId(Long id) {
+        return new Player(id, this.team, this.name, this.backNumber, this.position,
+                         this.birthDate, this.height, this.weight,
+                         this.battingRecords, this.pitchingRecords,
+                         this.gameBattingRecords, this.gamePitchingRecords,
+                         this.getCreatedAt(), this.getUpdatedAt(), this.getDeletedAt());
     }
     
     public Team getTeam() {

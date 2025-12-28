@@ -1,41 +1,49 @@
 package kbo.today.domain.stadium;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import java.time.LocalDateTime;
+import java.util.Objects;
 import kbo.today.common.domain.BaseEntity;
 
-@Entity
-@Table(name = "stadium_transports")
 public class StadiumTransport extends BaseEntity {
     
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "stadium_id")
     private Stadium stadium;
-    
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private TransportType transportType;
-    
-    @Column(nullable = false)
     private String route;
-    
     private String description;
     private String tip;
     
-    protected StadiumTransport() {}
+    protected StadiumTransport() {
+        super();
+    }
     
-    public StadiumTransport(Stadium stadium, TransportType transportType, String route, String description, String tip) {
+    protected StadiumTransport(Long id, Stadium stadium, TransportType transportType, String route,
+                           String description, String tip,
+                           LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime deletedAt) {
+        super(id, createdAt, updatedAt, deletedAt);
         this.stadium = stadium;
-        this.transportType = transportType;
-        this.route = route;
+        this.transportType = Objects.requireNonNull(transportType);
+        this.route = Objects.requireNonNull(route);
         this.description = description;
         this.tip = tip;
+    }
+    
+    public static StadiumTransport create(Stadium stadium, TransportType transportType, String route,
+                                         String description, String tip) {
+        return new StadiumTransport(null, stadium, transportType, route, description, tip,
+                                   null, null, null);
+    }
+    
+    public static StadiumTransport fromPersistence(Long id, Stadium stadium, TransportType transportType, String route,
+                                                   String description, String tip,
+                                                   LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime deletedAt) {
+        return new StadiumTransport(id, stadium, transportType, route, description, tip,
+                                   createdAt, updatedAt, deletedAt);
+    }
+    
+    public StadiumTransport withId(Long id) {
+        return new StadiumTransport(id, this.stadium, this.transportType, this.route,
+                                   this.description, this.tip,
+                                   this.getCreatedAt(), this.getUpdatedAt(), this.getDeletedAt());
     }
     
     public Stadium getStadium() {

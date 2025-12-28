@@ -6,16 +6,17 @@ import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import javax.crypto.SecretKey;
+import kbo.today.domain.user.port.JwtTokenPort;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-@Service
-public class JwtTokenService {
+@Component
+public class JwtTokenAdapter implements JwtTokenPort {
 
     private final SecretKey secretKey;
     private final long expirationTime;
 
-    public JwtTokenService(
+    public JwtTokenAdapter(
         @Value("${jwt.secret:defaultSecretKeyForDevelopmentOnlyChangeInProduction}") String secret,
         @Value("${jwt.expiration:86400000}") long expirationTime
     ) {
@@ -23,6 +24,7 @@ public class JwtTokenService {
         this.expirationTime = expirationTime;
     }
 
+    @Override
     public String generateToken(Long userId, String email, String role) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expirationTime);

@@ -1,38 +1,43 @@
 package kbo.today.domain.stadium;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import java.time.LocalDateTime;
+import java.util.Objects;
 import kbo.today.common.domain.BaseEntity;
 
-@Entity
-@Table(name = "stadium_foods")
 public class StadiumFood extends BaseEntity {
     
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "stadium_id")
     private Stadium stadium;
-    
-    @Column(nullable = false)
     private String name;
-    
-    @Column(nullable = false)
     private Integer price;
-    
     private String location;
     private Double rating;
     
-    protected StadiumFood() {}
+    protected StadiumFood() {
+        super();
+    }
     
-    public StadiumFood(Stadium stadium, String name, Integer price, String location, Double rating) {
+    protected StadiumFood(Long id, Stadium stadium, String name, Integer price, String location, Double rating,
+                       LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime deletedAt) {
+        super(id, createdAt, updatedAt, deletedAt);
         this.stadium = stadium;
-        this.name = name;
-        this.price = price;
+        this.name = Objects.requireNonNull(name);
+        this.price = Objects.requireNonNull(price);
         this.location = location;
         this.rating = rating;
+    }
+    
+    public static StadiumFood create(Stadium stadium, String name, Integer price, String location, Double rating) {
+        return new StadiumFood(null, stadium, name, price, location, rating, null, null, null);
+    }
+    
+    public static StadiumFood fromPersistence(Long id, Stadium stadium, String name, Integer price, String location, Double rating,
+                                              LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime deletedAt) {
+        return new StadiumFood(id, stadium, name, price, location, rating, createdAt, updatedAt, deletedAt);
+    }
+    
+    public StadiumFood withId(Long id) {
+        return new StadiumFood(id, this.stadium, this.name, this.price, this.location, this.rating,
+                              this.getCreatedAt(), this.getUpdatedAt(), this.getDeletedAt());
     }
     
     public Stadium getStadium() {

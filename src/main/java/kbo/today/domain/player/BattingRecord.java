@@ -1,24 +1,13 @@
 package kbo.today.domain.player;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import java.time.LocalDateTime;
+import java.util.Objects;
 import kbo.today.common.domain.BaseEntity;
 
-@Entity
-@Table(name = "batting_records")
 public class BattingRecord extends BaseEntity {
     
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "player_id")
     private Player player;
-    
-    @Column(nullable = false)
     private Integer season;
-    
     private Integer games = 0;
     private Integer plateAppearances = 0;
     private Integer atBats = 0;
@@ -35,11 +24,38 @@ public class BattingRecord extends BaseEntity {
     private Integer sacrificeFlies = 0;
     private Integer sacrificeBunts = 0;
     
-    protected BattingRecord() {}
+    protected BattingRecord() {
+        super();
+    }
     
-    public BattingRecord(Player player, Integer season) {
-        this.player = player;
-        this.season = season;
+    protected BattingRecord(Long id, Player player, Integer season, Integer games, Integer plateAppearances,
+                         Integer atBats, Integer hits, Integer doubles, Integer triples, Integer homeRuns,
+                         Integer runs, Integer rbis, Integer walks, Integer strikeouts,
+                         Integer stolenBases, Integer caughtStealing, Integer sacrificeFlies, Integer sacrificeBunts,
+                         LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime deletedAt) {
+        super(id, createdAt, updatedAt, deletedAt);
+        this.player = Objects.requireNonNull(player);
+        this.season = Objects.requireNonNull(season);
+        this.games = games != null ? games : 0;
+        this.plateAppearances = plateAppearances != null ? plateAppearances : 0;
+        this.atBats = atBats != null ? atBats : 0;
+        this.hits = hits != null ? hits : 0;
+        this.doubles = doubles != null ? doubles : 0;
+        this.triples = triples != null ? triples : 0;
+        this.homeRuns = homeRuns != null ? homeRuns : 0;
+        this.runs = runs != null ? runs : 0;
+        this.rbis = rbis != null ? rbis : 0;
+        this.walks = walks != null ? walks : 0;
+        this.strikeouts = strikeouts != null ? strikeouts : 0;
+        this.stolenBases = stolenBases != null ? stolenBases : 0;
+        this.caughtStealing = caughtStealing != null ? caughtStealing : 0;
+        this.sacrificeFlies = sacrificeFlies != null ? sacrificeFlies : 0;
+        this.sacrificeBunts = sacrificeBunts != null ? sacrificeBunts : 0;
+    }
+    
+    public static BattingRecord create(Player player, Integer season) {
+        return new BattingRecord(null, player, season, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                null, null, null);
     }
     
     public Player getPlayer() {
