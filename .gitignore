@@ -38,3 +38,6 @@ out/
 
 .DS_Store
 ./.gradle
+
+# Environment variables
+.env

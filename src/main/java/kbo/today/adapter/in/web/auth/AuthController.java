@@ -4,7 +4,6 @@ import kbo.today.adapter.in.web.auth.dto.CreateUserRequest;
 import kbo.today.adapter.in.web.auth.dto.CreateUserResponse;
 import kbo.today.adapter.in.web.auth.dto.LoginRequest;
 import kbo.today.adapter.in.web.auth.dto.LoginResponse;
-import kbo.today.domain.user.enumerable.UserRole;
 import kbo.today.domain.user.usecase.CreateUserCommand;
 import kbo.today.domain.user.usecase.CreateUserUseCase;
 import kbo.today.domain.user.usecase.LoginCommand;
