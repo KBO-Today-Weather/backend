@@ -1,6 +1,10 @@
 package kbo.today.domain.team;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Table;
 import kbo.today.common.domain.BaseEntity;
 
 @Entity

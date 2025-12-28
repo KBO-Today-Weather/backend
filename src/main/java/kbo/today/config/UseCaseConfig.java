@@ -1,6 +1,9 @@
 package kbo.today.config;
 
 import kbo.today.adapter.out.security.JwtTokenService;
+import kbo.today.domain.stadium.port.StadiumRepositoryPort;
+import kbo.today.domain.stadium.usecase.GetStadiumUseCase;
+import kbo.today.domain.stadium.usecase.impl.GetStadiumInteractor;
 import kbo.today.domain.user.port.UserRepositoryPort;
 import kbo.today.domain.user.usecase.CreateUserUseCase;
 import kbo.today.domain.user.usecase.LoginUseCase;
@@ -28,5 +31,10 @@ public class UseCaseConfig {
         JwtTokenService jwtTokenService
     ) {
         return new LoginInteractor(userRepositoryPort, passwordEncoder, jwtTokenService);
+    }
+
+    @Bean
+    public GetStadiumUseCase getStadiumUseCase(StadiumRepositoryPort stadiumRepositoryPort) {
+        return new GetStadiumInteractor(stadiumRepositoryPort);
     }
 }

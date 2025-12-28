@@ -1,9 +1,22 @@
 package kbo.today.domain.game;
 
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import kbo.today.common.domain.BaseEntity;
+import kbo.today.domain.player.GameBattingRecord;
+import kbo.today.domain.player.GamePitchingRecord;
 import kbo.today.domain.team.Team;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.time.LocalDateTime;
 
 @Entity
@@ -28,6 +41,12 @@ public class Game extends BaseEntity {
     private GameStatus status;
     
     private String stadium;
+    
+    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<GameBattingRecord> battingRecords;
+    
+    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<GamePitchingRecord> pitchingRecords;
     
     protected Game() {}
     
@@ -74,5 +93,13 @@ public class Game extends BaseEntity {
     
     public void finish() {
         this.status = GameStatus.FINISHED;
+    }
+    
+    public List<GameBattingRecord> getBattingRecords() {
+        return battingRecords != null ? battingRecords : new ArrayList<>();
+    }
+    
+    public List<GamePitchingRecord> getPitchingRecords() {
+        return pitchingRecords != null ? pitchingRecords : new ArrayList<>();
     }
 }

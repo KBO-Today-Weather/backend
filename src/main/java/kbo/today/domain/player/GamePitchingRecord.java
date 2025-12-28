@@ -1,26 +1,28 @@
 package kbo.today.domain.player;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import kbo.today.common.domain.BaseEntity;
+import kbo.today.domain.game.Game;
 
 @Entity
-@Table(name = "pitching_records")
-public class PitchingRecord extends BaseEntity {
+@Table(name = "game_pitching_records",
+       uniqueConstraints = @UniqueConstraint(columnNames = {"player_id", "game_id"}))
+public class GamePitchingRecord extends BaseEntity {
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "player_id")
+    @JoinColumn(name = "player_id", nullable = false)
     private Player player;
     
-    @Column(nullable = false)
-    private Integer season;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "game_id", nullable = false)
+    private Game game;
     
-    private Integer games = 0;
-    private Integer gamesStarted = 0;
+    private Boolean isStarter = false;
     private Integer wins = 0;
     private Integer losses = 0;
     private Integer saves = 0;
@@ -33,27 +35,23 @@ public class PitchingRecord extends BaseEntity {
     private Integer strikeouts = 0;
     private Integer homeRuns = 0;
     
-    protected PitchingRecord() {}
+    protected GamePitchingRecord() {}
     
-    public PitchingRecord(Player player, Integer season) {
+    public GamePitchingRecord(Player player, Game game) {
         this.player = player;
-        this.season = season;
+        this.game = game;
     }
     
     public Player getPlayer() {
         return player;
     }
     
-    public Integer getSeason() {
-        return season;
+    public Game getGame() {
+        return game;
     }
     
-    public Integer getGames() {
-        return games;
-    }
-    
-    public Integer getGamesStarted() {
-        return gamesStarted;
+    public Boolean getIsStarter() {
+        return isStarter;
     }
     
     public Integer getWins() {
@@ -108,17 +106,11 @@ public class PitchingRecord extends BaseEntity {
         return inningsPitched > 0 ? (double) (walks + hits) / inningsPitched : 0.0;
     }
     
-    public Double getWinningPercentage() {
-        int totalDecisions = wins + losses;
-        return totalDecisions > 0 ? (double) wins / totalDecisions : 0.0;
-    }
-    
-    public void updateStats(Integer games, Integer gamesStarted, Integer wins, Integer losses,
+    public void updateStats(Boolean isStarter, Integer wins, Integer losses,
                            Integer saves, Integer holds, Double inningsPitched, Integer hits,
                            Integer runs, Integer earnedRuns, Integer walks, Integer strikeouts,
                            Integer homeRuns) {
-        this.games = games;
-        this.gamesStarted = gamesStarted;
+        this.isStarter = isStarter;
         this.wins = wins;
         this.losses = losses;
         this.saves = saves;
@@ -132,3 +124,4 @@ public class PitchingRecord extends BaseEntity {
         this.homeRuns = homeRuns;
     }
 }
+

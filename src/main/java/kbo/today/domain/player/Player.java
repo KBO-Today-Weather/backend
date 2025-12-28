@@ -1,6 +1,15 @@
 package kbo.today.domain.player;
 
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import kbo.today.common.domain.BaseEntity;
 import kbo.today.domain.team.Team;
 
@@ -31,10 +40,16 @@ public class Player extends BaseEntity {
     private Integer weight;
     
     @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<BattingRecord> battingRecords = new ArrayList<>();
+    private List<BattingRecord> battingRecords;
     
     @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PitchingRecord> pitchingRecords = new ArrayList<>();
+    private List<PitchingRecord> pitchingRecords;
+    
+    @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<GameBattingRecord> gameBattingRecords;
+    
+    @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<GamePitchingRecord> gamePitchingRecords;
     
     protected Player() {}
     
@@ -88,10 +103,18 @@ public class Player extends BaseEntity {
     }
     
     public List<BattingRecord> getBattingRecords() {
-        return battingRecords;
+        return battingRecords != null ? battingRecords : new ArrayList<>();
     }
     
     public List<PitchingRecord> getPitchingRecords() {
-        return pitchingRecords;
+        return pitchingRecords != null ? pitchingRecords : new ArrayList<>();
+    }
+    
+    public List<GameBattingRecord> getGameBattingRecords() {
+        return gameBattingRecords != null ? gameBattingRecords : new ArrayList<>();
+    }
+    
+    public List<GamePitchingRecord> getGamePitchingRecords() {
+        return gamePitchingRecords != null ? gamePitchingRecords : new ArrayList<>();
     }
 }

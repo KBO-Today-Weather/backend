@@ -1,25 +1,27 @@
 package kbo.today.domain.player;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import kbo.today.common.domain.BaseEntity;
+import kbo.today.domain.game.Game;
 
 @Entity
-@Table(name = "batting_records")
-public class BattingRecord extends BaseEntity {
+@Table(name = "game_batting_records", 
+       uniqueConstraints = @UniqueConstraint(columnNames = {"player_id", "game_id"}))
+public class GameBattingRecord extends BaseEntity {
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "player_id")
+    @JoinColumn(name = "player_id", nullable = false)
     private Player player;
     
-    @Column(nullable = false)
-    private Integer season;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "game_id", nullable = false)
+    private Game game;
     
-    private Integer games = 0;
     private Integer plateAppearances = 0;
     private Integer atBats = 0;
     private Integer hits = 0;
@@ -33,23 +35,19 @@ public class BattingRecord extends BaseEntity {
     private Integer stolenBases = 0;
     private Integer caughtStealing = 0;
     
-    protected BattingRecord() {}
+    protected GameBattingRecord() {}
     
-    public BattingRecord(Player player, Integer season) {
+    public GameBattingRecord(Player player, Game game) {
         this.player = player;
-        this.season = season;
+        this.game = game;
     }
     
     public Player getPlayer() {
         return player;
     }
     
-    public Integer getSeason() {
-        return season;
-    }
-    
-    public Integer getGames() {
-        return games;
+    public Game getGame() {
+        return game;
     }
     
     public Integer getPlateAppearances() {
@@ -115,11 +113,10 @@ public class BattingRecord extends BaseEntity {
         return (double) totalBases / atBats;
     }
     
-    public void updateStats(Integer games, Integer plateAppearances, Integer atBats, 
+    public void updateStats(Integer plateAppearances, Integer atBats, 
                            Integer hits, Integer doubles, Integer triples, Integer homeRuns,
                            Integer runs, Integer rbis, Integer walks, Integer strikeouts,
                            Integer stolenBases, Integer caughtStealing) {
-        this.games = games;
         this.plateAppearances = plateAppearances;
         this.atBats = atBats;
         this.hits = hits;
@@ -134,3 +131,4 @@ public class BattingRecord extends BaseEntity {
         this.caughtStealing = caughtStealing;
     }
 }
+
