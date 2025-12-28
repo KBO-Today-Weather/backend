@@ -18,7 +18,8 @@ public record WeatherForecast(
         Integer weatherCode,
         Double windSpeed,
         Integer windDirection,
-        Double precipitation
+        Double precipitation,
+        Integer precipitationProbability
     ) {}
     
     public record HourlyWeather(
@@ -26,6 +27,7 @@ public record WeatherForecast(
         Double temperature,
         Double relativeHumidity,
         Double precipitation,
+        Integer precipitationProbability,
         Integer weatherCode,
         Double windSpeed,
         Integer windDirection
@@ -37,6 +39,7 @@ public record WeatherForecast(
         Double maxTemperature,
         Double minTemperature,
         Double precipitationSum,
+        Integer precipitationProbabilityMax,
         Double windSpeedMax
     ) {}
 }

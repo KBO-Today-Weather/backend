@@ -30,7 +30,8 @@ public record WeatherResponse(
         Integer weatherCode,
         Double windSpeed,
         Integer windDirection,
-        Double precipitation
+        Double precipitation,
+        Integer precipitationProbability
     ) {
         public static CurrentWeatherResponse from(WeatherForecast.CurrentWeather current) {
             return new CurrentWeatherResponse(
@@ -41,7 +42,8 @@ public record WeatherResponse(
                 current.weatherCode(),
                 current.windSpeed(),
                 current.windDirection(),
-                current.precipitation()
+                current.precipitation(),
+                current.precipitationProbability()
             );
         }
     }
@@ -51,6 +53,7 @@ public record WeatherResponse(
         Double temperature,
         Double relativeHumidity,
         Double precipitation,
+        Integer precipitationProbability,
         Integer weatherCode,
         Double windSpeed,
         Integer windDirection
@@ -61,6 +64,7 @@ public record WeatherResponse(
                 hourly.temperature(),
                 hourly.relativeHumidity(),
                 hourly.precipitation(),
+                hourly.precipitationProbability(),
                 hourly.weatherCode(),
                 hourly.windSpeed(),
                 hourly.windDirection()
@@ -74,6 +78,7 @@ public record WeatherResponse(
         Double maxTemperature,
         Double minTemperature,
         Double precipitationSum,
+        Integer precipitationProbabilityMax,
         Double windSpeedMax
     ) {
         public static DailyWeatherResponse from(WeatherForecast.DailyWeather daily) {
@@ -83,6 +88,7 @@ public record WeatherResponse(
                 daily.maxTemperature(),
                 daily.minTemperature(),
                 daily.precipitationSum(),
+                daily.precipitationProbabilityMax(),
                 daily.windSpeedMax()
             );
         }

@@ -24,5 +24,10 @@ public class StadiumRepositoryAdapter implements StadiumRepositoryPort {
     public List<Stadium> findAll() {
         return queryRepository.findAllWithTeam();
     }
+
+    @Override
+    public Optional<Stadium> findByIdForWeather(Long id) {
+        return queryRepository.findByIdForWeather(id);
+    }
 }
 

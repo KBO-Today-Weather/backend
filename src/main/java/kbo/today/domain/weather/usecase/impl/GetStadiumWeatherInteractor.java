@@ -23,7 +23,7 @@ public class GetStadiumWeatherInteractor implements GetStadiumWeatherUseCase {
 
     @Override
     public WeatherForecast getByStadiumId(Long stadiumId) {
-        Stadium stadium = stadiumRepository.findById(stadiumId)
+        Stadium stadium = stadiumRepository.findByIdForWeather(stadiumId)
             .orElseThrow(() -> new StadiumNotFoundException("Stadium not found: " + stadiumId));
 
         if (stadium.getLatitude() == null || stadium.getLongitude() == null) {

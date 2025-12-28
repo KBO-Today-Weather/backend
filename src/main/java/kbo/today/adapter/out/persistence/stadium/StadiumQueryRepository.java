@@ -44,5 +44,18 @@ public class StadiumQueryRepository {
             .leftJoin(stadium.team, team).fetchJoin()
             .fetch();
     }
+
+    public Optional<Stadium> findByIdForWeather(Long id) {
+        QStadium stadium = QStadium.stadium;
+        QTeam team = QTeam.team;
+
+        Stadium result = queryFactory
+            .selectFrom(stadium)
+            .leftJoin(stadium.team, team).fetchJoin()
+            .where(stadium.id.eq(id))
+            .fetchOne();
+
+        return Optional.ofNullable(result);
+    }
 }
 

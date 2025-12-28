@@ -7,5 +7,6 @@ import kbo.today.domain.stadium.Stadium;
 public interface StadiumRepositoryPort {
     Optional<Stadium> findById(Long id);
     List<Stadium> findAll();
+    Optional<Stadium> findByIdForWeather(Long id);
 }
 
