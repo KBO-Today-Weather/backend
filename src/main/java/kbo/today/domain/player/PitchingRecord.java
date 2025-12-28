@@ -32,6 +32,8 @@ public class PitchingRecord extends BaseEntity {
     private Integer walks = 0;
     private Integer strikeouts = 0;
     private Integer homeRuns = 0;
+    private Integer atBats = 0;
+    private Integer sacrificeFlies = 0;
     
     protected PitchingRecord() {}
     
@@ -100,6 +102,14 @@ public class PitchingRecord extends BaseEntity {
         return homeRuns;
     }
     
+    public Integer getAtBats() {
+        return atBats;
+    }
+    
+    public Integer getSacrificeFlies() {
+        return sacrificeFlies;
+    }
+    
     public Double getEra() {
         return inningsPitched > 0 ? (earnedRuns * 9.0) / inningsPitched : 0.0;
     }
@@ -113,10 +123,19 @@ public class PitchingRecord extends BaseEntity {
         return totalDecisions > 0 ? (double) wins / totalDecisions : 0.0;
     }
     
+    public Double getBabip() {
+        int denominator = atBats - strikeouts - homeRuns + sacrificeFlies;
+        return denominator > 0 ? (double) (hits - homeRuns) / denominator : 0.0;
+    }
+    
+    public Double getK9() {
+        return inningsPitched > 0 ? (strikeouts * 9.0) / inningsPitched : 0.0;
+    }
+    
     public void updateStats(Integer games, Integer gamesStarted, Integer wins, Integer losses,
                            Integer saves, Integer holds, Double inningsPitched, Integer hits,
                            Integer runs, Integer earnedRuns, Integer walks, Integer strikeouts,
-                           Integer homeRuns) {
+                           Integer homeRuns, Integer atBats, Integer sacrificeFlies) {
         this.games = games;
         this.gamesStarted = gamesStarted;
         this.wins = wins;
@@ -130,5 +149,7 @@ public class PitchingRecord extends BaseEntity {
         this.walks = walks;
         this.strikeouts = strikeouts;
         this.homeRuns = homeRuns;
+        this.atBats = atBats;
+        this.sacrificeFlies = sacrificeFlies;
     }
 }

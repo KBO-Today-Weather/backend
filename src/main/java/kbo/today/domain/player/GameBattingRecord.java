@@ -34,6 +34,8 @@ public class GameBattingRecord extends BaseEntity {
     private Integer strikeouts = 0;
     private Integer stolenBases = 0;
     private Integer caughtStealing = 0;
+    private Integer sacrificeFlies = 0;
+    private Integer sacrificeBunts = 0;
     
     protected GameBattingRecord() {}
     
@@ -98,6 +100,14 @@ public class GameBattingRecord extends BaseEntity {
         return caughtStealing;
     }
     
+    public Integer getSacrificeFlies() {
+        return sacrificeFlies;
+    }
+    
+    public Integer getSacrificeBunts() {
+        return sacrificeBunts;
+    }
+    
     public Double getBattingAverage() {
         return atBats > 0 ? (double) hits / atBats : 0.0;
     }
@@ -113,10 +123,19 @@ public class GameBattingRecord extends BaseEntity {
         return (double) totalBases / atBats;
     }
     
+    public Double getOps() {
+        return getOnBasePercentage() + getSluggingPercentage();
+    }
+    
+    public Double getWalkRate() {
+        return plateAppearances > 0 ? (double) walks / plateAppearances : 0.0;
+    }
+    
     public void updateStats(Integer plateAppearances, Integer atBats, 
                            Integer hits, Integer doubles, Integer triples, Integer homeRuns,
                            Integer runs, Integer rbis, Integer walks, Integer strikeouts,
-                           Integer stolenBases, Integer caughtStealing) {
+                           Integer stolenBases, Integer caughtStealing, Integer sacrificeFlies,
+                           Integer sacrificeBunts) {
         this.plateAppearances = plateAppearances;
         this.atBats = atBats;
         this.hits = hits;
@@ -129,6 +148,8 @@ public class GameBattingRecord extends BaseEntity {
         this.strikeouts = strikeouts;
         this.stolenBases = stolenBases;
         this.caughtStealing = caughtStealing;
+        this.sacrificeFlies = sacrificeFlies;
+        this.sacrificeBunts = sacrificeBunts;
     }
 }
 
