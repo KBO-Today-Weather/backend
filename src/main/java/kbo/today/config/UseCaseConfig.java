@@ -1,5 +1,10 @@
 package kbo.today.config;
 
+import kbo.today.domain.favorite.port.FavoriteStadiumRepositoryPort;
+import kbo.today.domain.favorite.usecase.AddFavoriteStadiumUseCase;
+import kbo.today.domain.favorite.usecase.DeleteFavoriteStadiumUseCase;
+import kbo.today.domain.favorite.usecase.impl.AddFavoriteStadiumInteractor;
+import kbo.today.domain.favorite.usecase.impl.DeleteFavoriteStadiumInteractor;
 import kbo.today.domain.stadium.port.StadiumRepositoryPort;
 import kbo.today.domain.stadium.usecase.GetStadiumUseCase;
 import kbo.today.domain.stadium.usecase.impl.GetStadiumInteractor;
@@ -47,5 +52,25 @@ public class UseCaseConfig {
         WeatherApiPort weatherApiPort
     ) {
         return new GetStadiumWeatherInteractor(stadiumRepositoryPort, weatherApiPort);
+    }
+
+    @Bean
+    public AddFavoriteStadiumUseCase addFavoriteStadiumUseCase(
+        FavoriteStadiumRepositoryPort favoriteStadiumRepositoryPort,
+        UserRepositoryPort userRepositoryPort,
+        StadiumRepositoryPort stadiumRepositoryPort
+    ) {
+        return new AddFavoriteStadiumInteractor(
+            favoriteStadiumRepositoryPort,
+            userRepositoryPort,
+            stadiumRepositoryPort
+        );
+    }
+
+    @Bean
+    public DeleteFavoriteStadiumUseCase deleteFavoriteStadiumUseCase(
+        FavoriteStadiumRepositoryPort favoriteStadiumRepositoryPort
+    ) {
+        return new DeleteFavoriteStadiumInteractor(favoriteStadiumRepositoryPort);
     }
 }
