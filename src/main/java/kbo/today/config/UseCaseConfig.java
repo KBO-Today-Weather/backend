@@ -15,6 +15,9 @@ import kbo.today.domain.user.usecase.CreateUserUseCase;
 import kbo.today.domain.user.usecase.LoginUseCase;
 import kbo.today.domain.user.usecase.impl.CreateUserInteractor;
 import kbo.today.domain.user.usecase.impl.LoginInteractor;
+import kbo.today.domain.team.port.TeamQueryPort;
+import kbo.today.domain.team.usecase.GetTeamsUseCase;
+import kbo.today.domain.team.usecase.impl.GetTeamsInteractor;
 import kbo.today.domain.weather.port.WeatherApiPort;
 import kbo.today.domain.weather.usecase.GetStadiumWeatherUseCase;
 import kbo.today.domain.weather.usecase.impl.GetStadiumWeatherInteractor;
@@ -72,5 +75,10 @@ public class UseCaseConfig {
         FavoriteStadiumRepositoryPort favoriteStadiumRepositoryPort
     ) {
         return new DeleteFavoriteStadiumInteractor(favoriteStadiumRepositoryPort);
+    }
+
+    @Bean
+    public GetTeamsUseCase getTeamsUseCase(TeamQueryPort teamQueryPort) {
+        return new GetTeamsInteractor(teamQueryPort);
     }
 }
