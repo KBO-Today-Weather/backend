@@ -4,6 +4,8 @@ import kbo.today.adapter.out.weather.dto.OpenMeteoCurrentData;
 import kbo.today.adapter.out.weather.dto.OpenMeteoDailyData;
 import kbo.today.adapter.out.weather.dto.OpenMeteoHourlyData;
 import kbo.today.adapter.out.weather.dto.OpenMeteoResponse;
+import kbo.today.common.exception.ErrorCode;
+import kbo.today.common.exception.WeatherApiException;
 import kbo.today.config.WeatherCacheConfig;
 import kbo.today.domain.weather.WeatherForecast;
 import kbo.today.domain.weather.port.WeatherApiPort;
@@ -47,7 +49,7 @@ public class OpenMeteoApiAdapter implements WeatherApiPort {
             .uri(url)
             .retrieve()
             .bodyToMono(OpenMeteoResponse.class)
-            .switchIfEmpty(Mono.error(new RuntimeException("Failed to fetch weather data from Open-Meteo API: null response")))
+            .switchIfEmpty(Mono.error(new WeatherApiException(ErrorCode.WEATHER_FETCH_FAILED, "Failed to fetch weather data from Open-Meteo API: null response")))
             .doOnNext(response -> log.debug("API Response - latitude: {}, longitude: {}, timezone: {}, current: {}",
                 response.latitude(), response.longitude(), response.timezone(),
                 response.current() != null ? "present" : "null"))
@@ -56,10 +58,13 @@ public class OpenMeteoApiAdapter implements WeatherApiPort {
             .onErrorMap(e -> {
                 if (e instanceof WebClientResponseException ex) {
                     log.error("Error calling Open-Meteo API: {}", ex.getMessage(), ex);
-                    return new RuntimeException("Failed to fetch weather data from Open-Meteo API: " + ex.getMessage(), ex);
+                    return new WeatherApiException(ErrorCode.WEATHER_FETCH_FAILED, "Failed to fetch weather data from Open-Meteo API: " + ex.getMessage(), ex);
+                }
+                if (e instanceof WeatherApiException) {
+                    return e;
                 }
                 log.error("Unexpected error while fetching weather data: {}", e.getMessage(), e);
-                return new RuntimeException("Failed to process weather data: " + e.getMessage(), e);
+                return new WeatherApiException(ErrorCode.WEATHER_INVALID_RESPONSE, "Failed to process weather data: " + e.getMessage(), e);
             })
             .cache();
     }
@@ -70,7 +75,7 @@ public class OpenMeteoApiAdapter implements WeatherApiPort {
         OpenMeteoDailyData daily = response.daily();
 
         if (current == null) {
-            throw new RuntimeException("Current weather data is missing from API response");
+            throw new WeatherApiException(ErrorCode.WEATHER_INVALID_RESPONSE, "Current weather data is missing from API response");
         }
 
         WeatherForecast.CurrentWeather currentWeather = new WeatherForecast.CurrentWeather(

@@ -11,6 +11,8 @@ import kbo.today.adapter.out.weather.dto.OpenMeteoCurrentData;
 import kbo.today.adapter.out.weather.dto.OpenMeteoDailyData;
 import kbo.today.adapter.out.weather.dto.OpenMeteoHourlyData;
 import kbo.today.adapter.out.weather.dto.OpenMeteoResponse;
+import kbo.today.common.exception.ErrorCode;
+import kbo.today.common.exception.WeatherApiException;
 import kbo.today.domain.weather.WeatherForecast;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -113,8 +115,9 @@ class OpenMeteoApiAdapterTest {
 
         // when & then
         assertThatThrownBy(() -> openMeteoApiAdapter.getWeatherForecast(latitude, longitude).block())
-            .isInstanceOf(RuntimeException.class)
-            .hasMessageContaining("null response");
+            .isInstanceOf(WeatherApiException.class)
+            .hasMessageContaining("null response")
+            .matches(e -> ((WeatherApiException) e).getErrorCode() == ErrorCode.WEATHER_FETCH_FAILED);
     }
 
     @Test
@@ -129,8 +132,9 @@ class OpenMeteoApiAdapterTest {
 
         // when & then
         assertThatThrownBy(() -> openMeteoApiAdapter.getWeatherForecast(latitude, longitude).block())
-            .isInstanceOf(RuntimeException.class)
-            .hasMessageContaining("Current weather data is missing");
+            .isInstanceOf(WeatherApiException.class)
+            .hasMessageContaining("Current weather data is missing")
+            .matches(e -> ((WeatherApiException) e).getErrorCode() == ErrorCode.WEATHER_INVALID_RESPONSE);
     }
 
     @Test
@@ -145,8 +149,9 @@ class OpenMeteoApiAdapterTest {
 
         // when & then
         assertThatThrownBy(() -> openMeteoApiAdapter.getWeatherForecast(latitude, longitude).block())
-            .isInstanceOf(RuntimeException.class)
-            .hasMessageContaining("Failed to fetch weather data from Open-Meteo API");
+            .isInstanceOf(WeatherApiException.class)
+            .hasMessageContaining("Failed to fetch weather data from Open-Meteo API")
+            .matches(e -> ((WeatherApiException) e).getErrorCode() == ErrorCode.WEATHER_FETCH_FAILED);
     }
 
     @Test
@@ -161,8 +166,9 @@ class OpenMeteoApiAdapterTest {
 
         // when & then
         assertThatThrownBy(() -> openMeteoApiAdapter.getWeatherForecast(latitude, longitude).block())
-            .isInstanceOf(RuntimeException.class)
-            .hasMessageContaining("Failed to process weather data");
+            .isInstanceOf(WeatherApiException.class)
+            .hasMessageContaining("Failed to process weather data")
+            .matches(e -> ((WeatherApiException) e).getErrorCode() == ErrorCode.WEATHER_INVALID_RESPONSE);
     }
 
     private OpenMeteoResponse createMockResponse() {

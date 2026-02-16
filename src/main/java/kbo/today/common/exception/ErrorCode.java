@@ -20,6 +20,10 @@ public enum ErrorCode {
     STADIUM_NOT_FOUND(HttpStatus.NOT_FOUND, "STADIUM_001", "Stadium not found"),
     INVALID_STADIUM_LOCATION(HttpStatus.BAD_REQUEST, "STADIUM_002", "Stadium location not set"),
 
+    // Weather Related (WEATHER_XXX)
+    WEATHER_FETCH_FAILED(HttpStatus.BAD_GATEWAY, "WEATHER_001", "Failed to fetch weather data from external service"),
+    WEATHER_INVALID_RESPONSE(HttpStatus.BAD_GATEWAY, "WEATHER_002", "Invalid weather data from external service"),
+
     // Validation (VALID_XXX)
     VALIDATION_ERROR(HttpStatus.BAD_REQUEST, "VALID_001", "Validation failed"),
 
