@@ -2,10 +2,12 @@ package kbo.today.adapter.out.weather;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import kbo.today.config.WeatherCacheConfig;
 import kbo.today.domain.weather.WeatherForecast;
 import kbo.today.domain.weather.port.WeatherApiPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -26,6 +28,7 @@ public class OpenMeteoApiAdapter implements WeatherApiPort {
     }
 
     @Override
+    @Cacheable(value = WeatherCacheConfig.WEATHER_CACHE_NAME, key = "T(java.lang.String).format('%.4f-%.4f', #latitude, #longitude)")
     public WeatherForecast getWeatherForecast(Double latitude, Double longitude) {
         String url = String.format(
             "%s?latitude=%.4f&longitude=%.4f&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m,precipitation,precipitation_probability&hourly=temperature_2m,relative_humidity_2m,precipitation,precipitation_probability,weather_code,wind_speed_10m,wind_direction_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max&timezone=Asia/Seoul",
