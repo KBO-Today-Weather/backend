@@ -27,7 +27,7 @@ public class OpenMeteoApiAdapter implements WeatherApiPort {
     public OpenMeteoApiAdapter(WebClient webClient) {
         this.webClient = webClient;
     }
-
+    
     @Override
     @Cacheable(value = WeatherCacheConfig.WEATHER_CACHE_NAME, key = "T(java.lang.String).format('%.4f-%.4f', #latitude, #longitude)")
     public Mono<WeatherForecast> getWeatherForecast(Double latitude, Double longitude) {

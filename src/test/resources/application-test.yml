@@ -17,3 +17,12 @@ spring:
 jwt:
   secret: test-secret-key-for-testing-purposes-only
   expiration: 3600000
+
+weather:
+  cache:
+    max-size: 100
+    expire-minutes: 10
+  webclient:
+    max-connections: 50
+    connect-timeout-seconds: 3
+    read-timeout-seconds: 10

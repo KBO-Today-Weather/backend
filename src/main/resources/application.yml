@@ -28,3 +28,12 @@ spring:
 jwt:
   secret: ${JWT_SECRET}
   expiration: ${JWT_EXPIRATION}
+
+weather:
+  cache:
+    max-size: 500
+    expire-minutes: 10
+  webclient:
+    max-connections: 500
+    connect-timeout-seconds: 3
+    read-timeout-seconds: 10
