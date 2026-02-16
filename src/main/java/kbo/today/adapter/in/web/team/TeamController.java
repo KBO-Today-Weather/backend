@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,21 +24,12 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Team", description = "팀 관련 API")
 @RestController
 @RequestMapping("/api/v1/teams")
+@RequiredArgsConstructor
 public class TeamController {
 
     private final GetTeamsUseCase getTeamsUseCase;
     private final GetTeamComparisonUseCase getTeamComparisonUseCase;
     private final GetTeamHistoryUseCase getTeamHistoryUseCase;
-
-    public TeamController(
-        GetTeamsUseCase getTeamsUseCase,
-        GetTeamComparisonUseCase getTeamComparisonUseCase,
-        GetTeamHistoryUseCase getTeamHistoryUseCase
-    ) {
-        this.getTeamsUseCase = getTeamsUseCase;
-        this.getTeamComparisonUseCase = getTeamComparisonUseCase;
-        this.getTeamHistoryUseCase = getTeamHistoryUseCase;
-    }
 
     @Operation(summary = "팀 목록 조회 (시즌별 순위)")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "조회 성공") })

@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kbo.today.adapter.in.web.favorite.dto.FavoriteStadiumResponse;
+import lombok.RequiredArgsConstructor;
 import kbo.today.domain.favorite.FavoriteStadium;
 import kbo.today.domain.favorite.usecase.AddFavoriteStadiumCommand;
 import kbo.today.domain.favorite.usecase.AddFavoriteStadiumUseCase;
@@ -21,18 +22,11 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Favorite", description = "즐겨찾기 관련 API")
 @RestController
 @RequestMapping("/api/v1/users/{userId}/favorites/stadiums")
+@RequiredArgsConstructor
 public class FavoriteStadiumController {
 
     private final AddFavoriteStadiumUseCase addFavoriteStadiumUseCase;
     private final DeleteFavoriteStadiumUseCase deleteFavoriteStadiumUseCase;
-
-    public FavoriteStadiumController(
-        AddFavoriteStadiumUseCase addFavoriteStadiumUseCase,
-        DeleteFavoriteStadiumUseCase deleteFavoriteStadiumUseCase
-    ) {
-        this.addFavoriteStadiumUseCase = addFavoriteStadiumUseCase;
-        this.deleteFavoriteStadiumUseCase = deleteFavoriteStadiumUseCase;
-    }
 
     @Operation(summary = "구장 즐겨찾기 등록", description = "사용자가 특정 구장을 즐겨찾기로 등록합니다.")
     @ApiResponses(value = {
