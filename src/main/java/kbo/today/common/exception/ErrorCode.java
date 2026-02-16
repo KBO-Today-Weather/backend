@@ -27,6 +27,9 @@ public enum ErrorCode {
     // Validation (VALID_XXX)
     VALIDATION_ERROR(HttpStatus.BAD_REQUEST, "VALID_001", "Validation failed"),
 
+    // Rate Limit (RATE_XXX)
+    RATE_LIMIT_EXCEEDED(HttpStatus.TOO_MANY_REQUESTS, "RATE_001", "Too many requests. Please try again later."),
+
     // General (GEN_XXX)
     INVALID_INPUT(HttpStatus.BAD_REQUEST, "GEN_001", "Invalid input"),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "GEN_500", "An unexpected error occurred");

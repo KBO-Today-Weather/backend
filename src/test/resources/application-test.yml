@@ -25,6 +25,14 @@ cors:
   allow-credentials: true
   max-age: 3600
 
+rate-limit:
+  login:
+    max-requests: 100
+    window-seconds: 60
+  signup:
+    max-requests: 100
+    window-seconds: 60
+
 weather:
   cache:
     max-size: 100
