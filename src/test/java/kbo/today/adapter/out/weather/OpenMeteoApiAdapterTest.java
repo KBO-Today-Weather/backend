@@ -2,9 +2,8 @@ package kbo.today.adapter.out.weather;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import kbo.today.domain.weather.WeatherForecast;
@@ -15,28 +14,42 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.http.HttpHeaders;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.core.publisher.Mono;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("OpenMeteoApiAdapter 단위 테스트")
 class OpenMeteoApiAdapterTest {
 
     @Mock
-    private RestTemplate restTemplate;
+    private WebClient webClient;
+
+    @Mock
+    private WebClient.RequestHeadersUriSpec requestHeadersUriSpec;
+
+    @Mock
+    private WebClient.RequestHeadersSpec requestHeadersSpec;
+
+    @Mock
+    private WebClient.ResponseSpec responseSpec;
 
     @InjectMocks
     private OpenMeteoApiAdapter openMeteoApiAdapter;
 
     private Object mockResponse;
-    private Class<?> responseClass;
     private static final String OPEN_METEO_API_URL = "https://api.open-meteo.com/v1/forecast";
 
     @BeforeEach
     void setUp() throws Exception {
-        // Mock response 생성 (리플렉션 사용)
-        responseClass = Class.forName("kbo.today.adapter.out.weather.OpenMeteoApiAdapter$OpenMeteoResponse");
         mockResponse = createMockResponse();
+    }
+
+    private void mockWebClientChain() {
+        when(webClient.get()).thenReturn(requestHeadersUriSpec);
+        when(requestHeadersUriSpec.uri(anyString())).thenReturn(requestHeadersSpec);
+        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
     }
 
     private String buildExpectedUrl(Double latitude, Double longitude) {
@@ -52,12 +65,11 @@ class OpenMeteoApiAdapterTest {
         // given
         Double latitude = 36.3174;
         Double longitude = 127.4288;
-
-        String expectedUrl = buildExpectedUrl(latitude, longitude);
-        doReturn(mockResponse).when(restTemplate).getForObject(eq(expectedUrl), eq(responseClass));
+        mockWebClientChain();
+        when(responseSpec.bodyToMono(org.mockito.ArgumentMatchers.any(Class.class))).thenReturn(Mono.just(mockResponse));
 
         // when
-        WeatherForecast result = openMeteoApiAdapter.getWeatherForecast(latitude, longitude);
+        WeatherForecast result = openMeteoApiAdapter.getWeatherForecast(latitude, longitude).block();
 
         // then
         assertThat(result).isNotNull();
@@ -79,13 +91,12 @@ class OpenMeteoApiAdapterTest {
         // given
         Double latitude = 36.3174;
         Double longitude = 127.4288;
-
         Object responseWithNull = createMockResponseWithNullLists();
-        String expectedUrl = buildExpectedUrl(latitude, longitude);
-        doReturn(responseWithNull).when(restTemplate).getForObject(eq(expectedUrl), eq(responseClass));
+        mockWebClientChain();
+        when(responseSpec.bodyToMono(org.mockito.ArgumentMatchers.any(Class.class))).thenReturn(Mono.just(responseWithNull));
 
         // when
-        WeatherForecast result = openMeteoApiAdapter.getWeatherForecast(latitude, longitude);
+        WeatherForecast result = openMeteoApiAdapter.getWeatherForecast(latitude, longitude).block();
 
         // then
         assertThat(result).isNotNull();
@@ -100,12 +111,11 @@ class OpenMeteoApiAdapterTest {
         // given
         Double latitude = 36.3174;
         Double longitude = 127.4288;
-
-        String expectedUrl = buildExpectedUrl(latitude, longitude);
-        doReturn(null).when(restTemplate).getForObject(eq(expectedUrl), eq(responseClass));
+        mockWebClientChain();
+        when(responseSpec.bodyToMono(org.mockito.ArgumentMatchers.any(Class.class))).thenReturn(Mono.empty());
 
         // when & then
-        assertThatThrownBy(() -> openMeteoApiAdapter.getWeatherForecast(latitude, longitude))
+        assertThatThrownBy(() -> openMeteoApiAdapter.getWeatherForecast(latitude, longitude).block())
             .isInstanceOf(RuntimeException.class)
             .hasMessageContaining("null response");
     }
@@ -116,29 +126,28 @@ class OpenMeteoApiAdapterTest {
         // given
         Double latitude = 36.3174;
         Double longitude = 127.4288;
-
         Object responseWithNullCurrent = createMockResponseWithNullCurrent();
-        String expectedUrl = buildExpectedUrl(latitude, longitude);
-        doReturn(responseWithNullCurrent).when(restTemplate).getForObject(eq(expectedUrl), eq(responseClass));
+        mockWebClientChain();
+        when(responseSpec.bodyToMono(org.mockito.ArgumentMatchers.any(Class.class))).thenReturn(Mono.just(responseWithNullCurrent));
 
         // when & then
-        assertThatThrownBy(() -> openMeteoApiAdapter.getWeatherForecast(latitude, longitude))
+        assertThatThrownBy(() -> openMeteoApiAdapter.getWeatherForecast(latitude, longitude).block())
             .isInstanceOf(RuntimeException.class)
             .hasMessageContaining("Current weather data is missing");
     }
 
     @Test
-    @DisplayName("RestClientException 발생 시 RuntimeException으로 래핑하여 발생시킨다")
-    void getWeatherForecast_RestClientException_ThrowsException() {
+    @DisplayName("WebClientResponseException 발생 시 RuntimeException으로 래핑하여 발생시킨다")
+    void getWeatherForecast_WebClientResponseException_ThrowsException() {
         // given
         Double latitude = 36.3174;
         Double longitude = 127.4288;
-
-        String expectedUrl = buildExpectedUrl(latitude, longitude);
-        doThrow(new RestClientException("Connection failed")).when(restTemplate).getForObject(eq(expectedUrl), eq(responseClass));
+        mockWebClientChain();
+        when(responseSpec.bodyToMono(org.mockito.ArgumentMatchers.any(Class.class)))
+            .thenReturn(Mono.error(WebClientResponseException.create(500, "Server Error", HttpHeaders.EMPTY, new byte[0], null)));
 
         // when & then
-        assertThatThrownBy(() -> openMeteoApiAdapter.getWeatherForecast(latitude, longitude))
+        assertThatThrownBy(() -> openMeteoApiAdapter.getWeatherForecast(latitude, longitude).block())
             .isInstanceOf(RuntimeException.class)
             .hasMessageContaining("Failed to fetch weather data from Open-Meteo API");
     }
@@ -149,12 +158,12 @@ class OpenMeteoApiAdapterTest {
         // given
         Double latitude = 36.3174;
         Double longitude = 127.4288;
-
-        String expectedUrl = buildExpectedUrl(latitude, longitude);
-        doThrow(new RuntimeException("Unexpected error")).when(restTemplate).getForObject(eq(expectedUrl), eq(responseClass));
+        mockWebClientChain();
+        when(responseSpec.bodyToMono(org.mockito.ArgumentMatchers.any(Class.class)))
+            .thenReturn(Mono.error(new RuntimeException("Unexpected error")));
 
         // when & then
-        assertThatThrownBy(() -> openMeteoApiAdapter.getWeatherForecast(latitude, longitude))
+        assertThatThrownBy(() -> openMeteoApiAdapter.getWeatherForecast(latitude, longitude).block())
             .isInstanceOf(RuntimeException.class)
             .hasMessageContaining("Failed to process weather data");
     }
@@ -162,19 +171,18 @@ class OpenMeteoApiAdapterTest {
     // Helper methods to create mock responses using reflection
     private Object createMockResponse() {
         try {
-            // 리플렉션을 사용하여 내부 클래스 인스턴스 생성
             Class<?> responseClass = Class.forName("kbo.today.adapter.out.weather.OpenMeteoApiAdapter$OpenMeteoResponse");
             java.lang.reflect.Constructor<?> constructor = responseClass.getDeclaredConstructor();
             constructor.setAccessible(true);
             Object response = constructor.newInstance();
-            
+
             setField(response, "latitude", 36.3174);
             setField(response, "longitude", 127.4288);
             setField(response, "timezone", "Asia/Seoul");
             setField(response, "current", createCurrentData());
             setField(response, "hourly", createHourlyData());
             setField(response, "daily", createDailyData());
-            
+
             return response;
         } catch (Exception e) {
             throw new RuntimeException("Failed to create mock response", e);
@@ -287,4 +295,3 @@ class OpenMeteoApiAdapterTest {
         }
     }
 }
-

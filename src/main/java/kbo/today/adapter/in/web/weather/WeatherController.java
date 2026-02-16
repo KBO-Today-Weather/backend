@@ -1,7 +1,6 @@
 package kbo.today.adapter.in.web.weather;
 
 import kbo.today.adapter.in.web.weather.dto.WeatherResponse;
-import kbo.today.domain.weather.WeatherForecast;
 import kbo.today.domain.weather.usecase.GetStadiumWeatherUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -12,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Mono;
 
 @Tag(name = "Weather", description = "날씨 관련 API")
 @RestController
@@ -31,9 +31,10 @@ public class WeatherController {
         @ApiResponse(responseCode = "400", description = "구장 위치 정보가 없음")
     })
     @GetMapping("/{stadiumId}/weather")
-    public ResponseEntity<WeatherResponse> getStadiumWeather(@PathVariable Long stadiumId) {
-        WeatherForecast forecast = getStadiumWeatherUseCase.getByStadiumId(stadiumId);
-        return ResponseEntity.ok(WeatherResponse.from(forecast));
+    public Mono<ResponseEntity<WeatherResponse>> getStadiumWeather(@PathVariable Long stadiumId) {
+        return getStadiumWeatherUseCase.getByStadiumId(stadiumId)
+            .map(WeatherResponse::from)
+            .map(ResponseEntity::ok);
     }
 }
 

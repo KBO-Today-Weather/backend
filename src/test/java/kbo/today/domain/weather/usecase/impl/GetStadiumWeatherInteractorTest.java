@@ -16,6 +16,7 @@ import kbo.today.domain.team.Team;
 import kbo.today.domain.weather.WeatherForecast;
 import kbo.today.domain.weather.port.WeatherApiPort;
 import org.junit.jupiter.api.BeforeEach;
+import reactor.core.publisher.Mono;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -85,10 +86,10 @@ class GetStadiumWeatherInteractorTest {
         when(stadiumRepository.findByIdForWeather(stadiumId))
             .thenReturn(Optional.of(stadiumWithLocation));
         when(weatherApiPort.getWeatherForecast(latitude, longitude))
-            .thenReturn(expectedForecast);
+            .thenReturn(Mono.just(expectedForecast));
 
         // when
-        WeatherForecast result = getStadiumWeatherInteractor.getByStadiumId(stadiumId);
+        WeatherForecast result = getStadiumWeatherInteractor.getByStadiumId(stadiumId).block();
 
         // then
         assertThat(result).isNotNull();
@@ -110,7 +111,7 @@ class GetStadiumWeatherInteractorTest {
             .thenReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> getStadiumWeatherInteractor.getByStadiumId(stadiumId))
+        assertThatThrownBy(() -> getStadiumWeatherInteractor.getByStadiumId(stadiumId).block())
             .isInstanceOf(StadiumNotFoundException.class)
             .hasMessageContaining("Stadium not found: 999");
 
@@ -139,7 +140,7 @@ class GetStadiumWeatherInteractorTest {
             .thenReturn(Optional.of(stadiumWithoutLatitude));
 
         // when & then
-        assertThatThrownBy(() -> getStadiumWeatherInteractor.getByStadiumId(stadiumId))
+        assertThatThrownBy(() -> getStadiumWeatherInteractor.getByStadiumId(stadiumId).block())
             .isInstanceOf(InvalidStadiumLocationException.class)
             .hasMessageContaining("Stadium location not set: 1");
 
@@ -168,7 +169,7 @@ class GetStadiumWeatherInteractorTest {
             .thenReturn(Optional.of(stadiumWithoutLongitude));
 
         // when & then
-        assertThatThrownBy(() -> getStadiumWeatherInteractor.getByStadiumId(stadiumId))
+        assertThatThrownBy(() -> getStadiumWeatherInteractor.getByStadiumId(stadiumId).block())
             .isInstanceOf(InvalidStadiumLocationException.class)
             .hasMessageContaining("Stadium location not set: 1");
 

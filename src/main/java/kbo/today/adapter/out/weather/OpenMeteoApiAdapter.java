@@ -9,8 +9,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,46 +22,41 @@ public class OpenMeteoApiAdapter implements WeatherApiPort {
 
     private static final Logger log = LoggerFactory.getLogger(OpenMeteoApiAdapter.class);
     private static final String OPEN_METEO_API_URL = "https://api.open-meteo.com/v1/forecast";
-    private final RestTemplate restTemplate;
+    private final WebClient webClient;
 
-    public OpenMeteoApiAdapter(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
+    public OpenMeteoApiAdapter(WebClient webClient) {
+        this.webClient = webClient;
     }
 
     @Override
     @Cacheable(value = WeatherCacheConfig.WEATHER_CACHE_NAME, key = "T(java.lang.String).format('%.4f-%.4f', #latitude, #longitude)")
-    public WeatherForecast getWeatherForecast(Double latitude, Double longitude) {
+    public Mono<WeatherForecast> getWeatherForecast(Double latitude, Double longitude) {
         String url = String.format(
             "%s?latitude=%.4f&longitude=%.4f&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m,precipitation,precipitation_probability&hourly=temperature_2m,relative_humidity_2m,precipitation,precipitation_probability,weather_code,wind_speed_10m,wind_direction_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max&timezone=Asia/Seoul",
             OPEN_METEO_API_URL, latitude, longitude
         );
 
-        try {
-            log.debug("Fetching weather data from Open-Meteo API: {}", url);
-            OpenMeteoResponse response = restTemplate.getForObject(url, OpenMeteoResponse.class);
-            
-            if (response == null) {
-                log.error("Open-Meteo API returned null response");
-                throw new RuntimeException("Failed to fetch weather data from Open-Meteo API: null response");
-            }
+        log.debug("Fetching weather data from Open-Meteo API: {}", url);
 
-            log.debug("API Response - latitude: {}, longitude: {}, timezone: {}, current: {}", 
-                response.latitude, response.longitude, response.timezone, 
-                response.current != null ? "present" : "null");
-            
-            if (response.current == null) {
-                log.error("Current weather data is null in API response");
-            }
-
-            log.debug("Successfully fetched weather data for latitude: {}, longitude: {}", latitude, longitude);
-            return mapToWeatherForecast(response);
-        } catch (RestClientException e) {
-            log.error("Error calling Open-Meteo API: {}", e.getMessage(), e);
-            throw new RuntimeException("Failed to fetch weather data from Open-Meteo API: " + e.getMessage(), e);
-        } catch (Exception e) {
-            log.error("Unexpected error while fetching weather data: {}", e.getMessage(), e);
-            throw new RuntimeException("Failed to process weather data: " + e.getMessage(), e);
-        }
+        return webClient.get()
+            .uri(url)
+            .retrieve()
+            .bodyToMono(OpenMeteoResponse.class)
+            .switchIfEmpty(Mono.error(new RuntimeException("Failed to fetch weather data from Open-Meteo API: null response")))
+            .doOnNext(response -> log.debug("API Response - latitude: {}, longitude: {}, timezone: {}, current: {}",
+                response.latitude, response.longitude, response.timezone,
+                response.current != null ? "present" : "null"))
+            .map(this::mapToWeatherForecast)
+            .doOnSuccess(forecast -> log.debug("Successfully fetched weather data for latitude: {}, longitude: {}", latitude, longitude))
+            .onErrorMap(e -> {
+                if (e instanceof WebClientResponseException ex) {
+                    log.error("Error calling Open-Meteo API: {}", ex.getMessage(), ex);
+                    return new RuntimeException("Failed to fetch weather data from Open-Meteo API: " + ex.getMessage(), ex);
+                }
+                log.error("Unexpected error while fetching weather data: {}", e.getMessage(), e);
+                return new RuntimeException("Failed to process weather data: " + e.getMessage(), e);
+            })
+            .cache();
     }
 
     private WeatherForecast mapToWeatherForecast(OpenMeteoResponse response) {
@@ -92,7 +88,7 @@ public class OpenMeteoApiAdapter implements WeatherApiPort {
                     hourly.temperature2m.get(i),
                     hourly.relativeHumidity2m.get(i),
                     hourly.precipitation.get(i),
-                    hourly.precipitationProbability != null && i < hourly.precipitationProbability.size() 
+                    hourly.precipitationProbability != null && i < hourly.precipitationProbability.size()
                         ? hourly.precipitationProbability.get(i) : null,
                     hourly.weatherCode.get(i),
                     hourly.windSpeed10m.get(i),
@@ -131,19 +127,19 @@ public class OpenMeteoApiAdapter implements WeatherApiPort {
     private static class OpenMeteoResponse {
         @JsonProperty("latitude")
         private Double latitude;
-        
+
         @JsonProperty("longitude")
         private Double longitude;
-        
+
         @JsonProperty("timezone")
         private String timezone;
-        
+
         @JsonProperty("current")
         private CurrentData current;
-        
+
         @JsonProperty("hourly")
         private HourlyData hourly;
-        
+
         @JsonProperty("daily")
         private DailyData daily;
 
@@ -160,28 +156,28 @@ public class OpenMeteoApiAdapter implements WeatherApiPort {
     private static class CurrentData {
         @JsonProperty("time")
         private String time;
-        
+
         @JsonProperty("temperature_2m")
         private Double temperature2m;
-        
+
         @JsonProperty("relative_humidity_2m")
         private Double relativeHumidity2m;
-        
+
         @JsonProperty("apparent_temperature")
         private Double apparentTemperature;
-        
+
         @JsonProperty("weather_code")
         private Integer weatherCode;
-        
+
         @JsonProperty("wind_speed_10m")
         private Double windSpeed10m;
-        
+
         @JsonProperty("wind_direction_10m")
         private Integer windDirection10m;
-        
+
         @JsonProperty("precipitation")
         private Double precipitation;
-        
+
         @JsonProperty("precipitation_probability")
         private Integer precipitationProbability;
 
@@ -201,25 +197,25 @@ public class OpenMeteoApiAdapter implements WeatherApiPort {
     private static class HourlyData {
         @JsonProperty("time")
         private List<String> time;
-        
+
         @JsonProperty("temperature_2m")
         private List<Double> temperature2m;
-        
+
         @JsonProperty("relative_humidity_2m")
         private List<Double> relativeHumidity2m;
-        
+
         @JsonProperty("precipitation")
         private List<Double> precipitation;
-        
+
         @JsonProperty("precipitation_probability")
         private List<Integer> precipitationProbability;
-        
+
         @JsonProperty("weather_code")
         private List<Integer> weatherCode;
-        
+
         @JsonProperty("wind_speed_10m")
         private List<Double> windSpeed10m;
-        
+
         @JsonProperty("wind_direction_10m")
         private List<Integer> windDirection10m;
     }
@@ -228,24 +224,23 @@ public class OpenMeteoApiAdapter implements WeatherApiPort {
     private static class DailyData {
         @JsonProperty("time")
         private List<String> time;
-        
+
         @JsonProperty("weather_code")
         private List<Integer> weatherCode;
-        
+
         @JsonProperty("temperature_2m_max")
         private List<Double> temperature2mMax;
-        
+
         @JsonProperty("temperature_2m_min")
         private List<Double> temperature2mMin;
-        
+
         @JsonProperty("precipitation_sum")
         private List<Double> precipitationSum;
-        
+
         @JsonProperty("precipitation_probability_max")
         private List<Integer> precipitationProbabilityMax;
-        
+
         @JsonProperty("wind_speed_10m_max")
         private List<Double> windSpeed10mMax;
     }
 }
-

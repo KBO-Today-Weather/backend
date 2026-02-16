@@ -12,6 +12,7 @@ import kbo.today.common.exception.StadiumNotFoundException;
 import kbo.today.domain.weather.WeatherForecast;
 import kbo.today.domain.weather.usecase.GetStadiumWeatherUseCase;
 import org.junit.jupiter.api.DisplayName;
+import reactor.core.publisher.Mono;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -80,7 +81,7 @@ class WeatherControllerTest {
             null
         );
 
-        when(getStadiumWeatherUseCase.getByStadiumId(stadiumId)).thenReturn(forecast);
+        when(getStadiumWeatherUseCase.getByStadiumId(stadiumId)).thenReturn(Mono.just(forecast));
 
         // when & then
         mockMvc.perform(get("/api/v1/stadiums/{stadiumId}/weather", stadiumId)
@@ -101,7 +102,7 @@ class WeatherControllerTest {
         // given
         Long stadiumId = 999L;
         when(getStadiumWeatherUseCase.getByStadiumId(stadiumId))
-            .thenThrow(new StadiumNotFoundException("Stadium not found: " + stadiumId));
+            .thenReturn(Mono.error(new StadiumNotFoundException("Stadium not found: " + stadiumId)));
 
         // when & then
         mockMvc.perform(get("/api/v1/stadiums/{stadiumId}/weather", stadiumId)
@@ -117,7 +118,7 @@ class WeatherControllerTest {
         // given
         Long stadiumId = 1L;
         when(getStadiumWeatherUseCase.getByStadiumId(stadiumId))
-            .thenThrow(new InvalidStadiumLocationException("Stadium location not set: " + stadiumId));
+            .thenReturn(Mono.error(new InvalidStadiumLocationException("Stadium location not set: " + stadiumId)));
 
         // when & then
         mockMvc.perform(get("/api/v1/stadiums/{stadiumId}/weather", stadiumId)
