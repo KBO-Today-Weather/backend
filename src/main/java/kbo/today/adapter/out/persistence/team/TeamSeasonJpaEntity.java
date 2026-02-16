@@ -48,6 +48,24 @@ public class TeamSeasonJpaEntity {
     @Column(name = "games_back")
     private Integer gamesBack;
 
+    @Column(name = "batting_average")
+    private Double battingAverage;
+
+    @Column(name = "home_runs")
+    private Integer homeRuns;
+
+    @Column(name = "era")
+    private Double era;
+
+    @Column(name = "stolen_bases")
+    private Integer stolenBases;
+
+    @Column(name = "fielding_percentage")
+    private Double fieldingPercentage;
+
+    @Column(name = "postseason_result")
+    private String postseasonResult;
+
     protected TeamSeasonJpaEntity() {
     }
 
@@ -127,5 +145,29 @@ public class TeamSeasonJpaEntity {
 
     public Integer getGamesBack() {
         return gamesBack;
+    }
+
+    public Double getBattingAverage() {
+        return battingAverage;
+    }
+
+    public Integer getHomeRuns() {
+        return homeRuns;
+    }
+
+    public Double getEra() {
+        return era;
+    }
+
+    public Integer getStolenBases() {
+        return stolenBases;
+    }
+
+    public Double getFieldingPercentage() {
+        return fieldingPercentage;
+    }
+
+    public String getPostseasonResult() {
+        return postseasonResult;
     }
 }

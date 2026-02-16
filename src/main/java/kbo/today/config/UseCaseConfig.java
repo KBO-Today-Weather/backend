@@ -15,8 +15,14 @@ import kbo.today.domain.user.usecase.CreateUserUseCase;
 import kbo.today.domain.user.usecase.LoginUseCase;
 import kbo.today.domain.user.usecase.impl.CreateUserInteractor;
 import kbo.today.domain.user.usecase.impl.LoginInteractor;
+import kbo.today.domain.team.port.TeamComparisonQueryPort;
+import kbo.today.domain.team.port.TeamHistoryQueryPort;
 import kbo.today.domain.team.port.TeamQueryPort;
+import kbo.today.domain.team.usecase.GetTeamComparisonUseCase;
+import kbo.today.domain.team.usecase.GetTeamHistoryUseCase;
 import kbo.today.domain.team.usecase.GetTeamsUseCase;
+import kbo.today.domain.team.usecase.impl.GetTeamComparisonInteractor;
+import kbo.today.domain.team.usecase.impl.GetTeamHistoryInteractor;
 import kbo.today.domain.team.usecase.impl.GetTeamsInteractor;
 import kbo.today.domain.weather.port.WeatherApiPort;
 import kbo.today.domain.weather.usecase.GetStadiumWeatherUseCase;
@@ -80,5 +86,15 @@ public class UseCaseConfig {
     @Bean
     public GetTeamsUseCase getTeamsUseCase(TeamQueryPort teamQueryPort) {
         return new GetTeamsInteractor(teamQueryPort);
+    }
+
+    @Bean
+    public GetTeamComparisonUseCase getTeamComparisonUseCase(TeamComparisonQueryPort teamComparisonQueryPort) {
+        return new GetTeamComparisonInteractor(teamComparisonQueryPort);
+    }
+
+    @Bean
+    public GetTeamHistoryUseCase getTeamHistoryUseCase(TeamHistoryQueryPort teamHistoryQueryPort) {
+        return new GetTeamHistoryInteractor(teamHistoryQueryPort);
     }
 }
