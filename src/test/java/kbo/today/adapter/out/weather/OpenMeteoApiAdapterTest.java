@@ -3,9 +3,14 @@ package kbo.today.adapter.out.weather;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import kbo.today.adapter.out.weather.dto.OpenMeteoCurrentData;
+import kbo.today.adapter.out.weather.dto.OpenMeteoDailyData;
+import kbo.today.adapter.out.weather.dto.OpenMeteoHourlyData;
+import kbo.today.adapter.out.weather.dto.OpenMeteoResponse;
 import kbo.today.domain.weather.WeatherForecast;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -38,11 +43,10 @@ class OpenMeteoApiAdapterTest {
     @InjectMocks
     private OpenMeteoApiAdapter openMeteoApiAdapter;
 
-    private Object mockResponse;
-    private static final String OPEN_METEO_API_URL = "https://api.open-meteo.com/v1/forecast";
+    private OpenMeteoResponse mockResponse;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() {
         mockResponse = createMockResponse();
     }
 
@@ -52,13 +56,6 @@ class OpenMeteoApiAdapterTest {
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
     }
 
-    private String buildExpectedUrl(Double latitude, Double longitude) {
-        return String.format(
-            "%s?latitude=%.4f&longitude=%.4f&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m,precipitation,precipitation_probability&hourly=temperature_2m,relative_humidity_2m,precipitation,precipitation_probability,weather_code,wind_speed_10m,wind_direction_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max&timezone=Asia/Seoul",
-            OPEN_METEO_API_URL, latitude, longitude
-        );
-    }
-
     @Test
     @DisplayName("날씨 정보를 성공적으로 조회한다")
     void getWeatherForecast_Success() {
@@ -66,7 +63,7 @@ class OpenMeteoApiAdapterTest {
         Double latitude = 36.3174;
         Double longitude = 127.4288;
         mockWebClientChain();
-        when(responseSpec.bodyToMono(org.mockito.ArgumentMatchers.any(Class.class))).thenReturn(Mono.just(mockResponse));
+        when(responseSpec.bodyToMono(eq(OpenMeteoResponse.class))).thenReturn(Mono.just(mockResponse));
 
         // when
         WeatherForecast result = openMeteoApiAdapter.getWeatherForecast(latitude, longitude).block();
@@ -91,9 +88,9 @@ class OpenMeteoApiAdapterTest {
         // given
         Double latitude = 36.3174;
         Double longitude = 127.4288;
-        Object responseWithNull = createMockResponseWithNullLists();
+        OpenMeteoResponse responseWithNull = createMockResponseWithNullLists();
         mockWebClientChain();
-        when(responseSpec.bodyToMono(org.mockito.ArgumentMatchers.any(Class.class))).thenReturn(Mono.just(responseWithNull));
+        when(responseSpec.bodyToMono(eq(OpenMeteoResponse.class))).thenReturn(Mono.just(responseWithNull));
 
         // when
         WeatherForecast result = openMeteoApiAdapter.getWeatherForecast(latitude, longitude).block();
@@ -112,7 +109,7 @@ class OpenMeteoApiAdapterTest {
         Double latitude = 36.3174;
         Double longitude = 127.4288;
         mockWebClientChain();
-        when(responseSpec.bodyToMono(org.mockito.ArgumentMatchers.any(Class.class))).thenReturn(Mono.empty());
+        when(responseSpec.bodyToMono(eq(OpenMeteoResponse.class))).thenReturn(Mono.empty());
 
         // when & then
         assertThatThrownBy(() -> openMeteoApiAdapter.getWeatherForecast(latitude, longitude).block())
@@ -126,9 +123,9 @@ class OpenMeteoApiAdapterTest {
         // given
         Double latitude = 36.3174;
         Double longitude = 127.4288;
-        Object responseWithNullCurrent = createMockResponseWithNullCurrent();
+        OpenMeteoResponse responseWithNullCurrent = createMockResponseWithNullCurrent();
         mockWebClientChain();
-        when(responseSpec.bodyToMono(org.mockito.ArgumentMatchers.any(Class.class))).thenReturn(Mono.just(responseWithNullCurrent));
+        when(responseSpec.bodyToMono(eq(OpenMeteoResponse.class))).thenReturn(Mono.just(responseWithNullCurrent));
 
         // when & then
         assertThatThrownBy(() -> openMeteoApiAdapter.getWeatherForecast(latitude, longitude).block())
@@ -143,7 +140,7 @@ class OpenMeteoApiAdapterTest {
         Double latitude = 36.3174;
         Double longitude = 127.4288;
         mockWebClientChain();
-        when(responseSpec.bodyToMono(org.mockito.ArgumentMatchers.any(Class.class)))
+        when(responseSpec.bodyToMono(eq(OpenMeteoResponse.class)))
             .thenReturn(Mono.error(WebClientResponseException.create(500, "Server Error", HttpHeaders.EMPTY, new byte[0], null)));
 
         // when & then
@@ -159,7 +156,7 @@ class OpenMeteoApiAdapterTest {
         Double latitude = 36.3174;
         Double longitude = 127.4288;
         mockWebClientChain();
-        when(responseSpec.bodyToMono(org.mockito.ArgumentMatchers.any(Class.class)))
+        when(responseSpec.bodyToMono(eq(OpenMeteoResponse.class)))
             .thenReturn(Mono.error(new RuntimeException("Unexpected error")));
 
         // when & then
@@ -168,130 +165,75 @@ class OpenMeteoApiAdapterTest {
             .hasMessageContaining("Failed to process weather data");
     }
 
-    // Helper methods to create mock responses using reflection
-    private Object createMockResponse() {
-        try {
-            Class<?> responseClass = Class.forName("kbo.today.adapter.out.weather.OpenMeteoApiAdapter$OpenMeteoResponse");
-            java.lang.reflect.Constructor<?> constructor = responseClass.getDeclaredConstructor();
-            constructor.setAccessible(true);
-            Object response = constructor.newInstance();
-
-            setField(response, "latitude", 36.3174);
-            setField(response, "longitude", 127.4288);
-            setField(response, "timezone", "Asia/Seoul");
-            setField(response, "current", createCurrentData());
-            setField(response, "hourly", createHourlyData());
-            setField(response, "daily", createDailyData());
-
-            return response;
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to create mock response", e);
-        }
+    private OpenMeteoResponse createMockResponse() {
+        return new OpenMeteoResponse(
+            36.3174,
+            127.4288,
+            "Asia/Seoul",
+            createCurrentData(),
+            createHourlyData(),
+            createDailyData()
+        );
     }
 
-    private Object createCurrentData() {
-        try {
-            Class<?> currentClass = Class.forName("kbo.today.adapter.out.weather.OpenMeteoApiAdapter$CurrentData");
-            java.lang.reflect.Constructor<?> constructor = currentClass.getDeclaredConstructor();
-            constructor.setAccessible(true);
-            Object current = constructor.newInstance();
-            setField(current, "time", "2024-01-01T12:00");
-            setField(current, "temperature2m", 15.0);
-            setField(current, "relativeHumidity2m", 60.0);
-            setField(current, "apparentTemperature", 14.0);
-            setField(current, "weatherCode", 0);
-            setField(current, "windSpeed10m", 5.0);
-            setField(current, "windDirection10m", 180);
-            setField(current, "precipitation", 0.0);
-            setField(current, "precipitationProbability", 0);
-            return current;
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to create current data", e);
-        }
+    private OpenMeteoCurrentData createCurrentData() {
+        return new OpenMeteoCurrentData(
+            "2024-01-01T12:00",
+            15.0,
+            60.0,
+            14.0,
+            0,
+            5.0,
+            180,
+            0.0,
+            0
+        );
     }
 
-    private Object createHourlyData() {
-        try {
-            Class<?> hourlyClass = Class.forName("kbo.today.adapter.out.weather.OpenMeteoApiAdapter$HourlyData");
-            java.lang.reflect.Constructor<?> constructor = hourlyClass.getDeclaredConstructor();
-            constructor.setAccessible(true);
-            Object hourly = constructor.newInstance();
-            setField(hourly, "time", Arrays.asList("2024-01-01T12:00", "2024-01-01T13:00"));
-            setField(hourly, "temperature2m", Arrays.asList(15.0, 16.0));
-            setField(hourly, "relativeHumidity2m", Arrays.asList(60.0, 65.0));
-            setField(hourly, "precipitation", Arrays.asList(0.0, 0.0));
-            setField(hourly, "precipitationProbability", Arrays.asList(0, 0));
-            setField(hourly, "weatherCode", Arrays.asList(0, 0));
-            setField(hourly, "windSpeed10m", Arrays.asList(5.0, 6.0));
-            setField(hourly, "windDirection10m", Arrays.asList(180, 190));
-            return hourly;
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to create hourly data", e);
-        }
+    private OpenMeteoHourlyData createHourlyData() {
+        return new OpenMeteoHourlyData(
+            Arrays.asList("2024-01-01T12:00", "2024-01-01T13:00"),
+            Arrays.asList(15.0, 16.0),
+            Arrays.asList(60.0, 65.0),
+            Arrays.asList(0.0, 0.0),
+            Arrays.asList(0, 0),
+            Arrays.asList(0, 0),
+            Arrays.asList(5.0, 6.0),
+            Arrays.asList(180, 190)
+        );
     }
 
-    private Object createDailyData() {
-        try {
-            Class<?> dailyClass = Class.forName("kbo.today.adapter.out.weather.OpenMeteoApiAdapter$DailyData");
-            java.lang.reflect.Constructor<?> constructor = dailyClass.getDeclaredConstructor();
-            constructor.setAccessible(true);
-            Object daily = constructor.newInstance();
-            setField(daily, "time", Arrays.asList("2024-01-01", "2024-01-02"));
-            setField(daily, "weatherCode", Arrays.asList(0, 0));
-            setField(daily, "temperature2mMax", Arrays.asList(20.0, 21.0));
-            setField(daily, "temperature2mMin", Arrays.asList(10.0, 11.0));
-            setField(daily, "precipitationSum", Arrays.asList(0.0, 0.0));
-            setField(daily, "precipitationProbabilityMax", Arrays.asList(0, 0));
-            setField(daily, "windSpeed10mMax", Arrays.asList(8.0, 9.0));
-            return daily;
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to create daily data", e);
-        }
+    private OpenMeteoDailyData createDailyData() {
+        return new OpenMeteoDailyData(
+            Arrays.asList("2024-01-01", "2024-01-02"),
+            Arrays.asList(0, 0),
+            Arrays.asList(20.0, 21.0),
+            Arrays.asList(10.0, 11.0),
+            Arrays.asList(0.0, 0.0),
+            Arrays.asList(0, 0),
+            Arrays.asList(8.0, 9.0)
+        );
     }
 
-    private Object createMockResponseWithNullLists() {
-        try {
-            Class<?> responseClass = Class.forName("kbo.today.adapter.out.weather.OpenMeteoApiAdapter$OpenMeteoResponse");
-            java.lang.reflect.Constructor<?> constructor = responseClass.getDeclaredConstructor();
-            constructor.setAccessible(true);
-            Object response = constructor.newInstance();
-            setField(response, "latitude", 36.3174);
-            setField(response, "longitude", 127.4288);
-            setField(response, "timezone", "Asia/Seoul");
-            setField(response, "current", createCurrentData());
-            setField(response, "hourly", null);
-            setField(response, "daily", null);
-            return response;
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to create mock response", e);
-        }
+    private OpenMeteoResponse createMockResponseWithNullLists() {
+        return new OpenMeteoResponse(
+            36.3174,
+            127.4288,
+            "Asia/Seoul",
+            createCurrentData(),
+            null,
+            null
+        );
     }
 
-    private Object createMockResponseWithNullCurrent() {
-        try {
-            Class<?> responseClass = Class.forName("kbo.today.adapter.out.weather.OpenMeteoApiAdapter$OpenMeteoResponse");
-            java.lang.reflect.Constructor<?> constructor = responseClass.getDeclaredConstructor();
-            constructor.setAccessible(true);
-            Object response = constructor.newInstance();
-            setField(response, "latitude", 36.3174);
-            setField(response, "longitude", 127.4288);
-            setField(response, "timezone", "Asia/Seoul");
-            setField(response, "current", null);
-            setField(response, "hourly", null);
-            setField(response, "daily", null);
-            return response;
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to create mock response", e);
-        }
-    }
-
-    private void setField(Object target, String fieldName, Object value) {
-        try {
-            java.lang.reflect.Field field = target.getClass().getDeclaredField(fieldName);
-            field.setAccessible(true);
-            field.set(target, value);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new RuntimeException("Failed to set field: " + fieldName, e);
-        }
+    private OpenMeteoResponse createMockResponseWithNullCurrent() {
+        return new OpenMeteoResponse(
+            36.3174,
+            127.4288,
+            "Asia/Seoul",
+            null,
+            null,
+            null
+        );
     }
 }
