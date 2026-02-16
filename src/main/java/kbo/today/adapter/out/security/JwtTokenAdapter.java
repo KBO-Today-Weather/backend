@@ -17,9 +17,12 @@ public class JwtTokenAdapter implements JwtTokenPort {
     private final long expirationTime;
 
     public JwtTokenAdapter(
-        @Value("${jwt.secret:defaultSecretKeyForDevelopmentOnlyChangeInProduction}") String secret,
+        @Value("${jwt.secret}") String secret,
         @Value("${jwt.expiration:86400000}") long expirationTime
     ) {
+        if (secret == null || secret.isBlank()) {
+            throw new IllegalStateException("jwt.secret must be set and non-empty (e.g. JWT_SECRET environment variable)");
+        }
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         this.expirationTime = expirationTime;
     }
