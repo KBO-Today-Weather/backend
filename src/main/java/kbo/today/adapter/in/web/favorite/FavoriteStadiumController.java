@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kbo.today.adapter.in.web.favorite.dto.FavoriteStadiumResponse;
+import kbo.today.common.security.LoginUser;
 import lombok.RequiredArgsConstructor;
 import kbo.today.domain.favorite.FavoriteStadium;
 import kbo.today.domain.favorite.usecase.AddFavoriteStadiumCommand;
@@ -33,6 +34,7 @@ public class FavoriteStadiumController {
         @ApiResponse(responseCode = "201", description = "즐겨찾기 등록 성공"),
         @ApiResponse(responseCode = "404", description = "사용자 또는 구장을 찾을 수 없음")
     })
+    @LoginUser
     @PostMapping("/{stadiumId}")
     public ResponseEntity<FavoriteStadiumResponse> addFavoriteStadium(
         @PathVariable Long userId,
@@ -48,6 +50,7 @@ public class FavoriteStadiumController {
         @ApiResponse(responseCode = "204", description = "즐겨찾기 해제 성공 (또는 이미 즐겨찾기가 아님)"),
         @ApiResponse(responseCode = "404", description = "사용자 또는 구장을 찾을 수 없음 (등록 시점)")
     })
+    @LoginUser
     @DeleteMapping("/{stadiumId}")
     public ResponseEntity<Void> deleteFavoriteStadium(
         @PathVariable Long userId,
